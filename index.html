@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Tee Forecast</title>
-<meta name="theme-color" content="#0E1D18">
+<meta name="theme-color" content="#0E1D18" id="themecolor">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Tee Forecast">
@@ -12,6 +12,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
+  /* ---------- dark (default) ---------- */
   :root{
     --turf:   #0E1D18;
     --raised: #172C24;
@@ -25,6 +26,24 @@
     --firm:   #C9B486;
     --soft:   #5A9C9E;
     --sodden: #3E6BAA;
+    --onband: #0E1D18;
+  }
+
+  /* ---------- light ---------- */
+  :root[data-theme="light"]{
+    --turf:   #F3F6F1;
+    --raised: #FFFFFF;
+    --line:   #D3DCD2;
+    --ink:    #16241E;
+    --muted:  #5C7268;
+    --dead:   #9AACA1;
+    --go:     #2E9E54;
+    --hold:   #BF7A12;
+    --stop:   #C43C2A;
+    --firm:   #9C7F3C;
+    --soft:   #37787A;
+    --sodden: #2C5490;
+    --onband: #FFFFFF;
   }
 
   *{ box-sizing:border-box; margin:0; padding:0; }
@@ -42,22 +61,23 @@
   /* ---------- masthead ---------- */
 
   header{
-    display:flex; align-items:flex-end; justify-content:space-between; gap:16px;
+    display:flex; align-items:flex-end; justify-content:space-between; gap:12px;
     padding:calc(22px + env(safe-area-inset-top)) 0 14px;
   }
+  .brand{ flex:1; min-width:0; }
   h1{ font-family:'Barlow Condensed',sans-serif; font-size:34px; font-weight:700; line-height:.95; }
   .stamp{ color:var(--muted); font-size:12.5px; margin-top:3px; }
 
-  #refresh{
+  .iconbtn{
     flex:0 0 auto; width:44px; height:44px; border-radius:50%;
     border:1px solid var(--line); background:var(--raised); color:var(--ink);
     display:grid; place-items:center; cursor:pointer; transition:border-color .2s;
   }
-  #refresh:hover{ border-color:var(--muted); }
-  #refresh:focus-visible{ outline:2px solid var(--go); outline-offset:2px; }
+  .iconbtn:hover{ border-color:var(--muted); }
+  .iconbtn:focus-visible{ outline:2px solid var(--go); outline-offset:2px; }
+  .iconbtn svg{ width:19px; height:19px; fill:none; stroke:currentColor; stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round; }
   #refresh.spin svg{ animation:turn .7s ease-in-out; }
   @keyframes turn{ to{ transform:rotate(360deg); } }
-  #refresh svg{ width:19px; height:19px; fill:none; stroke:currentColor; stroke-width:1.9; stroke-linecap:round; }
 
   /* ---------- tabs ---------- */
 
@@ -74,7 +94,8 @@
 
   /* ---------- search ---------- */
 
-  .findwrap{ position:relative; margin-bottom:18px; }
+  .findwrap{ position:relative; margin-bottom:9px; }
+  #jumpwrap{ margin:0 0 20px; }
   #find{
     width:100%; padding:13px 40px 13px 15px;
     background:transparent; border:1px solid var(--line); border-radius:9px;
@@ -97,7 +118,6 @@
     padding:11px 15px; border-bottom:1px solid var(--line);
   }
   .hit:last-child{ border-bottom:0; }
-  .hit:hover{ background:#1D362C; }
   .hit:focus-visible{ outline:2px solid var(--go); outline-offset:-2px; }
   .hit small{ color:var(--muted); font-size:12.5px; margin-left:7px; }
   .nohit{ color:var(--muted); font-size:13.5px; padding:14px 0; }
@@ -119,38 +139,64 @@
     color:var(--ink); font-family:'Barlow',sans-serif; font-size:13px;
   }
 
-  .dayblock{ border-top:1px solid var(--line); padding:16px 0 6px; }
-  .dayhead{ display:flex; align-items:baseline; gap:9px; margin-bottom:3px; }
-  .lamp{ width:13px; height:13px; border-radius:50%; flex:0 0 auto; }
-  .daydate{ font-family:'Barlow Condensed',sans-serif; font-size:19px; font-weight:600; }
-  .dayhigh{ color:var(--muted); font-size:13px; margin-left:auto; }
-  .verdict{ font-size:14px; margin-bottom:5px; }
-  .gline{ font-size:13px; color:var(--firm); margin-bottom:14px; }
+  .dayblock{ margin-bottom:26px; }
+  .whenline{
+    display:flex; align-items:baseline; gap:9px;
+    font-family:'Barlow Condensed',sans-serif; font-size:18px; font-weight:600;
+    margin-bottom:9px;
+  }
+  .whenline em{ font-style:normal; color:var(--muted); font-weight:500; font-size:15px; }
+  .whenline .hi{ margin-left:auto; font-family:'Barlow',sans-serif; font-size:13px; font-weight:400; color:var(--muted); }
+
+  /* the big stoplight */
+  .band{
+    display:flex; align-items:center; gap:14px;
+    border-radius:11px; padding:15px 17px; margin-bottom:11px;
+    color:var(--onband);
+  }
+  .band.go{ background:var(--go); }
+  .band.hold{ background:var(--hold); }
+  .band.stop{ background:var(--stop); }
+  .bandword{
+    font-family:'Barlow Condensed',sans-serif; font-size:30px; font-weight:700;
+    line-height:.9; letter-spacing:.01em; flex:0 0 auto;
+  }
+  .bandtext{ font-size:14px; line-height:1.35; opacity:.92; }
+
+  .gline{ font-size:13px; color:var(--ink); margin-bottom:14px; }
   .gline span{ color:var(--muted); }
-  .gline i{ display:inline-block; width:14px; height:5px; border-radius:3px; margin-right:7px; }
+  .gline i{ display:inline-block; width:14px; height:5px; border-radius:3px; margin-right:8px; vertical-align:middle; }
 
   .hours{
-    display:flex; gap:4px; overflow-x:auto; padding-bottom:10px;
+    display:flex; gap:4px; overflow-x:auto; padding-bottom:8px;
     scrollbar-width:none; -webkit-overflow-scrolling:touch;
   }
   .hours::-webkit-scrollbar{ display:none; }
   .hcell{
-    flex:0 0 42px; display:flex; flex-direction:column; align-items:center; gap:4px;
-    font-family:'Barlow Condensed',sans-serif;
-    padding:6px 0 5px; border-radius:6px;
+    flex:0 0 44px; display:flex; flex-direction:column; align-items:center; gap:4px;
+    font-family:'Barlow Condensed',sans-serif; padding:7px 0 6px; border-radius:7px;
   }
   .hcell.now{ background:var(--raised); }
-  .hr{ font-size:12px; color:var(--muted); letter-spacing:.02em; }
+  .hr{ font-size:12px; color:var(--muted); }
+  .wx{ height:18px; display:grid; place-items:center; }
+  .wx svg{ width:17px; height:17px; fill:none; stroke:currentColor; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; }
+  .wx.storm{ color:var(--stop); }
+  .wx.rain{ color:var(--sodden); }
+  .wx.cloud{ color:var(--muted); }
+  .wx.sun{ color:var(--hold); }
   .htemp{ font-size:15px; font-weight:600; }
   .barwrap{
-    width:100%; height:34px; display:flex; align-items:flex-end; justify-content:center;
+    width:100%; height:32px; display:flex; align-items:flex-end; justify-content:center;
     border-bottom:1px solid var(--line);
   }
-  .bar{ width:11px; border-radius:2px 2px 0 0; background:var(--sodden); min-height:0; }
+  .bar{ width:11px; border-radius:2px 2px 0 0; background:var(--sodden); }
   .hmm{ font-size:11px; color:var(--muted); height:14px; }
-  .htick{ width:26px; height:3px; border-radius:2px; }
+  .wind{ display:flex; align-items:center; gap:2px; font-size:11px; color:var(--muted); height:14px; }
+  .wind svg{ width:10px; height:10px; fill:none; stroke:currentColor; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
+  .wind.strong{ color:var(--hold); }
+  .htick{ width:28px; height:4px; border-radius:2px; }
 
-  .scrollnote{ color:var(--dead); font-size:11px; margin:-4px 0 2px; }
+  .scrollnote{ color:var(--dead); font-size:11px; }
 
   /* ---------- lists view ---------- */
 
@@ -168,7 +214,7 @@
     padding:6px 13px; cursor:pointer;
   }
   .chip:hover{ color:var(--ink); border-color:var(--muted); }
-  .chip[aria-pressed="true"]{ color:var(--turf); background:var(--go); border-color:var(--go); font-weight:500; }
+  .chip[aria-pressed="true"]{ color:var(--onband); background:var(--go); border-color:var(--go); font-weight:500; }
   .chip:focus-visible{ outline:2px solid var(--go); outline-offset:2px; }
 
   .picker{ position:relative; margin:14px 0 4px; }
@@ -184,7 +230,6 @@
     border-right:1.7px solid var(--muted); border-bottom:1.7px solid var(--muted);
     transform:rotate(45deg); pointer-events:none;
   }
-  option, optgroup{ background:#172C24; color:#E9F0EA; }
 
   .course{ border-top:1px solid var(--line); padding:15px 0 16px; }
   .chead{ display:flex; align-items:baseline; gap:8px; margin-bottom:9px; }
@@ -209,6 +254,7 @@
   }
   .dow{ font-size:12px; font-weight:600; color:var(--muted); }
   .date{ font-size:11px; color:var(--dead); margin-top:-4px; }
+  .lamp{ width:15px; height:15px; border-radius:50%; }
   .deg{ font-size:15px; font-weight:600; line-height:1; }
   .ground{ display:grid; grid-template-columns:repeat(7,1fr); gap:5px; margin-top:4px; }
   .gbar{ height:6px; border-radius:3px; }
@@ -257,11 +303,12 @@
 <body>
 
 <header>
-  <div>
+  <div class="brand">
     <h1>Tee Forecast</h1>
     <div class="stamp" id="stamp">Loading&hellip;</div>
   </div>
-  <button id="refresh" aria-label="Refresh forecast">
+  <button class="iconbtn" id="theme" aria-label="Switch theme"></button>
+  <button class="iconbtn" id="refresh" aria-label="Refresh forecast">
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-.9 4.5"/><path d="M20 5v6h-6"/></svg>
   </button>
 </header>
@@ -276,6 +323,9 @@
     <input id="find" type="text" autocomplete="off" placeholder="Search for a course" aria-label="Search for a course">
     <button id="clear" type="button" aria-label="Clear search" hidden>&times;</button>
   </div>
+  <div class="picker" id="jumpwrap">
+    <select id="jump" aria-label="Choose a course from the list"></select>
+  </div>
   <div id="detail"></div>
 </section>
 
@@ -284,8 +334,8 @@
 <div class="key">
   <b>Play</b>
   <span><i class="go"></i>Good</span>
-  <span><i class="hold"></i>Drizzle or heat</span>
-  <span><i class="stop"></i>Storms or heavy rain</span>
+  <span><i class="hold"></i>Caution</span>
+  <span><i class="stop"></i>Avoid</span>
   <b>Ground</b>
   <span><i class="bar firm"></i>Firm</span>
   <span><i class="bar soft"></i>Soft</span>
@@ -294,8 +344,8 @@
 
 <p class="credit">
   Forecasts from <a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo</a>, free for non-commercial use.
-  Ground is inferred from 72&nbsp;hours of rainfall and modelled soil moisture &mdash; it is not a course report,
-  and drainage varies a lot between clubs.
+  Wind arrows show the direction the wind is blowing towards. Ground is inferred from 72&nbsp;hours of rainfall and
+  modelled soil moisture &mdash; it is not a course report, and drainage varies a lot between clubs.
 </p>
 
 <script>
@@ -330,6 +380,14 @@ const COURSES = [
   { id:'greenfield',  name:'Ayala Greenfield',  area:'Calamba',         region:'Laguna', lat:14.1534, lon:121.1600 },
   { id:'hallowridge', name:'Hallow Ridge',      area:'San Pedro',       region:'Laguna', lat:14.3566, lon:121.0283 },
   { id:'caliraya',    name:'Caliraya Springs',  area:'Cavinti',         region:'Laguna', lat:14.2869, lon:121.5557 },
+
+  { id:'midlands',    name:'Tagaytay Midlands', area:'Talisay',         region:'Batangas', lat:14.1282, lon:121.0366 },
+  { id:'splendido',   name:'Splendido Taal',    area:'Laurel',          region:'Batangas', lat:14.0624, lon:120.8730 },
+  { id:'vineyard',    name:'Vineyard',          area:'Tanauan',         region:'Batangas', lat:14.0712, lon:121.0715 },
+  { id:'summitpoint', name:'Summit Point',      area:'Lipa',            region:'Batangas', lat:14.0011, lon:121.1909 },
+  { id:'malarayat',   name:'Mount Malarayat',   area:'Lipa',            region:'Batangas', lat:13.9614, lon:121.1894 },
+  { id:'fernando',    name:'Fernando Air Base', area:'Lipa',            region:'Batangas', lat:13.9414, lon:121.1238 },
+  { id:'calatagan',   name:'Calatagan',         area:'Calatagan',       region:'Batangas', lat:13.8588, lon:120.6520 },
 
   { id:'northwoods',  name:'Royal Northwoods',  area:'San Rafael',       region:'North', lat:14.9927, lon:120.9652 },
   { id:'pradera',     name:'Pradera Verde',     area:'Lubao',            region:'North', lat:14.8880, lon:120.4972 },
@@ -368,12 +426,16 @@ const RULES = {
   soilSoft:   0.35,      // m3/m3 at 3-9cm       -> soft
   soilSodden: 0.42,      // m3/m3 at 3-9cm       -> sodden
 
-  barMax:     6          // mm that fills the rain bar
+  barMax:     6,         // mm that fills the rain bar
+  windStrong: 25         // km/h that highlights the wind arrow
 };
+
+const WORD = { go:'Good', hold:'Caution', stop:'Avoid' };
 
 const K = {
   sel:'teesheet.courses', cache:'teesheet.cache', notes:'teesheet.notes',
-  lists:'teesheet.lists', current:'teesheet.current', list:'teesheet.activelist'
+  lists:'teesheet.lists', current:'teesheet.current', list:'teesheet.activelist',
+  theme:'teesheet.theme'
 };
 
 let selected = load(K.sel, PRESETS[0].ids.slice());
@@ -401,14 +463,70 @@ function needed(){
 }
 
 /* ==================================================================
-   4. FORECAST
+   4. THEME
+   ================================================================== */
+
+const SUN  = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/>' +
+             '<path d="M12 2.4v2.2M12 19.4v2.2M2.4 12h2.2M19.4 12h2.2M5.2 5.2l1.6 1.6M17.2 17.2l1.6 1.6M18.8 5.2l-1.6 1.6M6.8 17.2l-1.6 1.6"/></svg>';
+const MOON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8.2 8.2 0 0 1 9.5 4 8.3 8.3 0 1 0 20 14.5z"/></svg>';
+
+let theme = load(K.theme, null);
+if(theme !== 'light' && theme !== 'dark'){
+  theme = (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) ? 'light' : 'dark';
+}
+
+function applyTheme(){
+  document.documentElement.setAttribute('data-theme', theme);
+  const btn = document.getElementById('theme');
+  btn.innerHTML = theme === 'light' ? MOON : SUN;
+  btn.setAttribute('aria-label', theme === 'light' ? 'Switch to dark theme' : 'Switch to light theme');
+  document.getElementById('themecolor').setAttribute('content', theme === 'light' ? '#F3F6F1' : '#0E1D18');
+}
+
+document.getElementById('theme').onclick = function(){
+  theme = (theme === 'light') ? 'dark' : 'light';
+  save(K.theme, theme);
+  applyTheme();
+};
+
+applyTheme();
+
+/* ==================================================================
+   5. WEATHER ICONS
+   ================================================================== */
+
+const CLOUD = 'M7 15.5h10a3.7 3.7 0 0 0 .3-7.4 5.2 5.2 0 0 0-9.9 1.3A3.2 3.2 0 0 0 7 15.5z';
+
+function icon(code){
+  if(code >= 95)
+    return { cls:'storm', svg:'<svg viewBox="0 0 24 24"><path d="' + CLOUD + '"/><path d="M13.6 16.2L10 20.6h3.2L11.6 24"/></svg>' };
+  if(code === 65 || code === 67 || code === 82)
+    return { cls:'rain', svg:'<svg viewBox="0 0 24 24"><path d="' + CLOUD + '"/><path d="M8.5 17.6l-1.2 4M12 17.6l-1.2 4M15.5 17.6l-1.2 4"/></svg>' };
+  if((code >= 51 && code <= 63) || code === 80 || code === 81 || code === 66)
+    return { cls:'rain', svg:'<svg viewBox="0 0 24 24"><path d="' + CLOUD + '"/><path d="M9.5 17.8l-1 3.4M14 17.8l-1 3.4"/></svg>' };
+  if(code === 3 || code === 45 || code === 48)
+    return { cls:'cloud', svg:'<svg viewBox="0 0 24 24"><path d="' + CLOUD + '"/></svg>' };
+  if(code === 1 || code === 2)
+    return { cls:'cloud', svg:'<svg viewBox="0 0 24 24"><circle cx="8.5" cy="7.5" r="3"/><path d="' + CLOUD + '"/></svg>' };
+  return { cls:'sun', svg:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2"/>' +
+           '<path d="M12 3.4v2M12 18.6v2M3.4 12h2M18.6 12h2M6 6l1.4 1.4M16.6 16.6L18 18M18 6l-1.4 1.4M7.4 16.6L6 18"/></svg>' };
+}
+
+// Meteorological direction is where wind comes FROM; the arrow points where it goes TO.
+function windArrow(dir){
+  return '<svg viewBox="0 0 24 24" style="transform:rotate(' + ((dir + 180) % 360) + 'deg)">' +
+         '<path d="M12 21V4M12 4l-5 5M12 4l5 5"/></svg>';
+}
+
+/* ==================================================================
+   6. FORECAST
    ================================================================== */
 
 function url(c){
   return 'https://api.open-meteo.com/v1/forecast'
     + '?latitude=' + c.lat + '&longitude=' + c.lon
     + '&hourly=temperature_2m,apparent_temperature,precipitation,precipitation_probability,'
-    + 'weather_code,wind_gusts_10m,soil_moisture_3_to_9cm'
+    + 'weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m,soil_moisture_3_to_9cm'
     + '&timezone=auto&past_days=3&forecast_days=7';
 }
 
@@ -417,6 +535,8 @@ async function fetchCourse(c){
   if(!res.ok) throw new Error('HTTP ' + res.status);
   const h = (await res.json()).hourly;
   const soilSeries = h.soil_moisture_3_to_9cm || null;
+  const windSeries = h.wind_speed_10m || null;
+  const dirSeries  = h.wind_direction_10m || null;
 
   const rows = h.time.map(function(t, i){
     return {
@@ -429,6 +549,8 @@ async function fetchCourse(c){
       pop:  h.precipitation_probability[i],
       code: h.weather_code[i],
       gust: h.wind_gusts_10m[i],
+      wind: windSeries ? windSeries[i] : null,
+      dir:  dirSeries  ? dirSeries[i]  : null,
       soil: soilSeries ? soilSeries[i] : null
     };
   });
@@ -457,8 +579,11 @@ async function fetchCourse(c){
     hours[date] = rows
       .filter(function(r){ return r.date === date && r.hour >= RULES.strip[0] && r.hour <= RULES.strip[1]; })
       .map(function(r){
-        return { hour:r.hour, temp:Math.round(r.temp), feels:Math.round(r.feels),
-                 mm:r.mm, pop:r.pop, level:hourLevel(r) };
+        return {
+          hour:r.hour, temp:Math.round(r.temp), mm:r.mm, pop:r.pop, code:r.code,
+          wind:(r.wind == null ? null : Math.round(r.wind)),
+          dir:r.dir, level:hourLevel(r)
+        };
       });
   });
 
@@ -538,13 +663,34 @@ function longDate(d){
 }
 
 /* ==================================================================
-   5. COURSE VIEW
+   7. COURSE VIEW
    ================================================================== */
 
 const find   = document.getElementById('find');
 const clearB = document.getElementById('clear');
+const jump   = document.getElementById('jump');
 const detail = document.getElementById('detail');
 const stamp  = document.getElementById('stamp');
+
+function buildJump(){
+  jump.innerHTML = '<option value="">Or pick from the list</option>';
+  const regions = [];
+  COURSES.forEach(function(c){ if(regions.indexOf(c.region) < 0) regions.push(c.region); });
+  regions.forEach(function(region){
+    const g = document.createElement('optgroup');
+    g.label = region;
+    COURSES.filter(function(c){ return c.region === region; }).forEach(function(c){
+      const o = document.createElement('option');
+      o.value = c.id;
+      o.textContent = c.name + '  \u00b7  ' + c.area;
+      g.appendChild(o);
+    });
+    jump.appendChild(g);
+  });
+  jump.value = current || '';
+}
+
+jump.onchange = function(){ if(jump.value) openCourse(jump.value); };
 
 function matches(q){
   const t = q.trim().toLowerCase();
@@ -586,12 +732,10 @@ function renderCourse(){
     return;
   }
 
-  detail.insertAdjacentHTML('beforeend',
-    '<div class="title"></div><div class="sub"></div>');
+  detail.insertAdjacentHTML('beforeend', '<div class="title"></div><div class="sub"></div>');
   detail.querySelector('.title').textContent = c.name;
   detail.querySelector('.sub').textContent = c.area + ' \u00b7 ' + c.region;
 
-  // --- note ---
   if(editing){
     const input = document.createElement('input');
     input.className = 'noteinput';
@@ -629,8 +773,7 @@ function renderCourse(){
     return;
   }
 
-  const now  = new Date();
-  const nowH = now.getHours();
+  const nowH  = new Date().getHours();
   const dates = Object.keys(entry.hours).sort();
 
   dates.forEach(function(date, idx){
@@ -640,17 +783,21 @@ function renderCourse(){
     const block = document.createElement('section');
     block.className = 'dayblock';
 
-    const head = document.createElement('div');
-    head.className = 'dayhead';
-    head.innerHTML = '<span class="lamp ' + d.level + '"></span>' +
-                     '<span class="daydate"></span>' +
-                     '<span class="dayhigh"></span>';
-    head.querySelector('.daydate').textContent = (idx === 0 ? 'Today \u00b7 ' : 'Tomorrow \u00b7 ') + longDate(date);
-    head.querySelector('.dayhigh').textContent = d.temp + '\u00b0 / feels ' + d.feels + '\u00b0';
-    block.appendChild(head);
+    const when = document.createElement('div');
+    when.className = 'whenline';
+    when.innerHTML = '<span></span><em></em><span class="hi"></span>';
+    when.children[0].textContent = idx === 0 ? 'Today' : 'Tomorrow';
+    when.children[1].textContent = longDate(date);
+    when.children[2].textContent = d.temp + '\u00b0 / feels ' + d.feels + '\u00b0';
+    block.appendChild(when);
 
-    block.insertAdjacentHTML('beforeend', '<p class="verdict"></p>');
-    block.querySelector('.verdict').textContent = d.reason;
+    const band = document.createElement('div');
+    band.className = 'band ' + d.level;
+    band.setAttribute('role', 'status');
+    band.innerHTML = '<span class="bandword"></span><span class="bandtext"></span>';
+    band.querySelector('.bandword').textContent = WORD[d.level];
+    band.querySelector('.bandtext').textContent = d.reason;
+    block.appendChild(band);
 
     const gl = document.createElement('p');
     gl.className = 'gline';
@@ -661,22 +808,30 @@ function renderCourse(){
     const strip = document.createElement('div');
     strip.className = 'hours';
     entry.hours[date].forEach(function(r){
-      const cell = document.createElement('div');
-      const isNow = idx === 0 && r.hour === nowH;
+      const cell   = document.createElement('div');
+      const isNow  = idx === 0 && r.hour === nowH;
+      const glyph  = icon(r.code);
+      const barPx  = r.mm > 0 ? Math.max(Math.min(r.mm / RULES.barMax, 1) * 32, 2) : 0;
+      const strong = r.wind != null && r.wind >= RULES.windStrong;
+
       cell.className = 'hcell' + (isNow ? ' now' : '');
-      const h = Math.min(r.mm / RULES.barMax, 1) * 34;
       cell.innerHTML =
         '<span class="hr">' + shortClock(r.hour) + '</span>' +
+        '<span class="wx ' + glyph.cls + '">' + glyph.svg + '</span>' +
         '<span class="htemp">' + r.temp + '\u00b0</span>' +
-        '<span class="barwrap"><span class="bar" style="height:' + (r.mm > 0 ? Math.max(h, 2) : 0) + 'px"></span></span>' +
+        '<span class="barwrap"><span class="bar" style="height:' + barPx + 'px"></span></span>' +
         '<span class="hmm">' + (r.mm >= 0.1 ? r.mm.toFixed(1) : '') + '</span>' +
+        (r.wind == null ? '<span class="wind"></span>'
+          : '<span class="wind' + (strong ? ' strong' : '') + '">' +
+            (r.dir == null ? '' : windArrow(r.dir)) + r.wind + '</span>') +
         '<span class="htick ' + r.level + '"></span>';
-      cell.title = clock(r.hour) + ' \u00b7 ' + r.temp + '\u00b0 \u00b7 ' + r.mm.toFixed(1) + 'mm \u00b7 ' + r.pop + '%';
+      cell.title = clock(r.hour) + ' \u00b7 ' + r.temp + '\u00b0 \u00b7 ' + r.mm.toFixed(1) + 'mm \u00b7 ' +
+                   r.pop + '%' + (r.wind == null ? '' : ' \u00b7 wind ' + r.wind + ' km/h');
       strip.appendChild(cell);
     });
     block.appendChild(strip);
     block.insertAdjacentHTML('beforeend',
-      '<p class="scrollnote">5am to 7pm \u00b7 scroll sideways \u00b7 bar height is rainfall</p>');
+      '<p class="scrollnote">5am to 7pm \u00b7 scroll sideways \u00b7 bar height is rainfall, arrow is wind</p>');
 
     detail.appendChild(block);
   });
@@ -686,6 +841,7 @@ function openCourse(id){
   current = id;
   save(K.current, current);
   query = ''; find.value = ''; editing = false;
+  jump.value = id;
   showTab('course');
   renderCourse();
   if(!cache[id]) refresh();
@@ -695,7 +851,7 @@ find.oninput = function(){ query = find.value; renderCourse(); };
 clearB.onclick = function(){ query = ''; find.value = ''; renderCourse(); find.focus(); };
 
 /* ==================================================================
-   6. LISTS VIEW
+   8. LISTS VIEW
    ================================================================== */
 
 const listView = document.getElementById('view-lists');
@@ -708,11 +864,10 @@ function allLists(){
 function renderLists(){
   listView.innerHTML = '';
 
-  // --- list chips ---
   listView.insertAdjacentHTML('beforeend', '<h2 class="sect">Lists</h2>');
   const chips = document.createElement('div');
   chips.className = 'chips';
-  allLists().forEach(function(l, i){
+  allLists().forEach(function(l){
     const b = document.createElement('button');
     b.className = 'chip';
     b.type = 'button';
@@ -730,7 +885,6 @@ function renderLists(){
   listView.insertAdjacentHTML('beforeend',
     '<p class="hint">Lists marked \u2022 are saved in this browser only. The rest live in the file and open the same way anywhere.</p>');
 
-  // --- picker ---
   const pick = document.createElement('div');
   pick.className = 'picker';
   const sel = document.createElement('select');
@@ -759,7 +913,6 @@ function renderLists(){
   pick.appendChild(sel);
   listView.appendChild(pick);
 
-  // --- the sheet ---
   if(!selected.length){
     listView.insertAdjacentHTML('beforeend', '<p class="empty">Nothing on this list yet.</p>');
   } else {
@@ -830,7 +983,6 @@ function renderLists(){
     });
   }
 
-  // --- manage ---
   listView.insertAdjacentHTML('beforeend', '<h2 class="sect">Manage</h2>');
   const tools = document.createElement('div');
 
@@ -896,7 +1048,7 @@ function renderLists(){
 }
 
 /* ==================================================================
-   7. TABS + DATA FLOW
+   9. TABS + DATA FLOW
    ================================================================== */
 
 function showTab(which){
@@ -938,6 +1090,7 @@ async function refresh(){
 
 document.getElementById('refresh').onclick = refresh;
 
+buildJump();
 renderCourse();
 refresh();
 </script>
