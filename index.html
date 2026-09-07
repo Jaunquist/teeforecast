@@ -13,67 +13,45 @@
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --turf:      #0E1D18;
-    --raised:    #172C24;
-    --line:      #294338;
-    --ink:       #E9F0EA;
-    --muted:     #86A093;
-    --go:        #3FBF6A;
-    --hold:      #E8A33D;
-    --stop:      #E0523F;
-    --dead:      #3A4F46;
+    --turf:   #0E1D18;
+    --raised: #172C24;
+    --line:   #294338;
+    --ink:    #E9F0EA;
+    --muted:  #86A093;
+    --dead:   #3A4F46;
+    --go:     #3FBF6A;
+    --hold:   #E8A33D;
+    --stop:   #E0523F;
+    --firm:   #C9B486;
+    --soft:   #5A9C9E;
+    --sodden: #3E6BAA;
   }
 
   *{ box-sizing:border-box; margin:0; padding:0; }
-
   html{ background:var(--turf); }
 
   body{
-    background:var(--turf);
-    color:var(--ink);
+    background:var(--turf); color:var(--ink);
     font-family:'Barlow',system-ui,-apple-system,sans-serif;
-    font-size:15px;
-    line-height:1.45;
+    font-size:15px; line-height:1.45;
     -webkit-font-smoothing:antialiased;
     padding:0 16px calc(40px + env(safe-area-inset-bottom));
-    max-width:640px;
-    margin:0 auto;
+    max-width:640px; margin:0 auto;
   }
 
   /* ---------- masthead ---------- */
 
   header{
-    display:flex;
-    align-items:flex-end;
-    justify-content:space-between;
-    gap:16px;
-    padding:calc(22px + env(safe-area-inset-top)) 0 16px;
+    display:flex; align-items:flex-end; justify-content:space-between; gap:16px;
+    padding:calc(22px + env(safe-area-inset-top)) 0 14px;
   }
-
-  h1{
-    font-family:'Barlow Condensed',sans-serif;
-    font-size:34px;
-    font-weight:700;
-    letter-spacing:.01em;
-    line-height:.95;
-  }
-
-  .stamp{
-    color:var(--muted);
-    font-size:12.5px;
-    margin-top:3px;
-  }
+  h1{ font-family:'Barlow Condensed',sans-serif; font-size:34px; font-weight:700; line-height:.95; }
+  .stamp{ color:var(--muted); font-size:12.5px; margin-top:3px; }
 
   #refresh{
-    flex:0 0 auto;
-    width:44px; height:44px;
-    border-radius:50%;
-    border:1px solid var(--line);
-    background:var(--raised);
-    color:var(--ink);
-    display:grid; place-items:center;
-    cursor:pointer;
-    transition:transform .35s ease, border-color .2s;
+    flex:0 0 auto; width:44px; height:44px; border-radius:50%;
+    border:1px solid var(--line); background:var(--raised); color:var(--ink);
+    display:grid; place-items:center; cursor:pointer; transition:border-color .2s;
   }
   #refresh:hover{ border-color:var(--muted); }
   #refresh:focus-visible{ outline:2px solid var(--go); outline-offset:2px; }
@@ -81,136 +59,199 @@
   @keyframes turn{ to{ transform:rotate(360deg); } }
   #refresh svg{ width:19px; height:19px; fill:none; stroke:currentColor; stroke-width:1.9; stroke-linecap:round; }
 
-  /* ---------- picker ---------- */
+  /* ---------- tabs ---------- */
 
-  .picker{ position:relative; margin-bottom:22px; }
+  .tabs{ display:flex; gap:22px; border-bottom:1px solid var(--line); margin-bottom:18px; }
+  .tab{
+    border:0; background:transparent; cursor:pointer;
+    font-family:'Barlow Condensed',sans-serif; font-size:16px; font-weight:600;
+    letter-spacing:.05em; color:var(--muted); padding:0 0 10px;
+    border-bottom:2px solid transparent; margin-bottom:-1px;
+  }
+  .tab[aria-selected="true"]{ color:var(--ink); border-bottom-color:var(--go); }
+  .tab:focus-visible{ outline:2px solid var(--go); outline-offset:2px; }
+  .view[hidden]{ display:none; }
 
+  /* ---------- search ---------- */
+
+  .findwrap{ position:relative; margin-bottom:18px; }
+  #find{
+    width:100%; padding:13px 40px 13px 15px;
+    background:transparent; border:1px solid var(--line); border-radius:9px;
+    color:var(--ink); font-family:'Barlow',sans-serif; font-size:15px;
+  }
+  #find::placeholder{ color:var(--dead); }
+  #find:focus-visible{ outline:2px solid var(--go); outline-offset:1px; }
+  #clear{
+    position:absolute; right:6px; top:6px; width:34px; height:34px;
+    border:0; border-radius:50%; background:transparent;
+    color:var(--dead); font-size:19px; cursor:pointer;
+  }
+  #clear:hover{ color:var(--ink); }
+
+  .results{ border:1px solid var(--line); border-radius:9px; overflow:hidden; margin-bottom:18px; }
+  .hit{
+    display:block; width:100%; text-align:left; border:0; cursor:pointer;
+    background:var(--raised); color:var(--ink);
+    font-family:'Barlow',sans-serif; font-size:15px;
+    padding:11px 15px; border-bottom:1px solid var(--line);
+  }
+  .hit:last-child{ border-bottom:0; }
+  .hit:hover{ background:#1D362C; }
+  .hit:focus-visible{ outline:2px solid var(--go); outline-offset:-2px; }
+  .hit small{ color:var(--muted); font-size:12.5px; margin-left:7px; }
+  .nohit{ color:var(--muted); font-size:13.5px; padding:14px 0; }
+
+  /* ---------- course detail ---------- */
+
+  .title{ font-family:'Barlow Condensed',sans-serif; font-size:30px; font-weight:700; line-height:1.05; }
+  .sub{ color:var(--muted); font-size:13px; margin-bottom:12px; }
+
+  .note{
+    display:block; width:100%; text-align:left; border:0; background:transparent; cursor:pointer;
+    color:var(--hold); font-size:13px; font-style:italic; padding:0 0 16px;
+  }
+  .note.blank{ color:var(--dead); font-style:normal; }
+  .note:focus-visible{ outline:2px solid var(--go); outline-offset:1px; }
+  .noteinput{
+    width:100%; margin-bottom:16px; padding:9px 11px;
+    background:var(--raised); border:1px solid var(--line); border-radius:7px;
+    color:var(--ink); font-family:'Barlow',sans-serif; font-size:13px;
+  }
+
+  .dayblock{ border-top:1px solid var(--line); padding:16px 0 6px; }
+  .dayhead{ display:flex; align-items:baseline; gap:9px; margin-bottom:3px; }
+  .lamp{ width:13px; height:13px; border-radius:50%; flex:0 0 auto; }
+  .daydate{ font-family:'Barlow Condensed',sans-serif; font-size:19px; font-weight:600; }
+  .dayhigh{ color:var(--muted); font-size:13px; margin-left:auto; }
+  .verdict{ font-size:14px; margin-bottom:5px; }
+  .gline{ font-size:13px; color:var(--firm); margin-bottom:14px; }
+  .gline span{ color:var(--muted); }
+  .gline i{ display:inline-block; width:14px; height:5px; border-radius:3px; margin-right:7px; }
+
+  .hours{
+    display:flex; gap:4px; overflow-x:auto; padding-bottom:10px;
+    scrollbar-width:none; -webkit-overflow-scrolling:touch;
+  }
+  .hours::-webkit-scrollbar{ display:none; }
+  .hcell{
+    flex:0 0 42px; display:flex; flex-direction:column; align-items:center; gap:4px;
+    font-family:'Barlow Condensed',sans-serif;
+    padding:6px 0 5px; border-radius:6px;
+  }
+  .hcell.now{ background:var(--raised); }
+  .hr{ font-size:12px; color:var(--muted); letter-spacing:.02em; }
+  .htemp{ font-size:15px; font-weight:600; }
+  .barwrap{
+    width:100%; height:34px; display:flex; align-items:flex-end; justify-content:center;
+    border-bottom:1px solid var(--line);
+  }
+  .bar{ width:11px; border-radius:2px 2px 0 0; background:var(--sodden); min-height:0; }
+  .hmm{ font-size:11px; color:var(--muted); height:14px; }
+  .htick{ width:26px; height:3px; border-radius:2px; }
+
+  .scrollnote{ color:var(--dead); font-size:11px; margin:-4px 0 2px; }
+
+  /* ---------- lists view ---------- */
+
+  .sect{
+    font-family:'Barlow Condensed',sans-serif; font-size:15px; font-weight:600;
+    letter-spacing:.05em; color:var(--muted); margin:24px 0 8px;
+  }
+  .sect:first-child{ margin-top:0; }
+  .hint{ color:var(--dead); font-size:12px; margin-bottom:12px; line-height:1.5; }
+
+  .chips{ display:flex; flex-wrap:wrap; gap:7px; margin-bottom:6px; }
+  .chip{
+    border:1px solid var(--line); border-radius:20px; background:transparent;
+    color:var(--muted); font-family:'Barlow',sans-serif; font-size:13.5px;
+    padding:6px 13px; cursor:pointer;
+  }
+  .chip:hover{ color:var(--ink); border-color:var(--muted); }
+  .chip[aria-pressed="true"]{ color:var(--turf); background:var(--go); border-color:var(--go); font-weight:500; }
+  .chip:focus-visible{ outline:2px solid var(--go); outline-offset:2px; }
+
+  .picker{ position:relative; margin:14px 0 4px; }
   select{
-    -webkit-appearance:none; appearance:none;
-    width:100%;
-    padding:13px 40px 13px 15px;
-    background:transparent;
-    border:1px solid var(--line);
-    border-radius:9px;
-    color:var(--ink);
-    font-family:'Barlow',sans-serif;
-    font-size:15px;
-    cursor:pointer;
+    -webkit-appearance:none; appearance:none; width:100%;
+    padding:12px 40px 12px 15px; background:transparent;
+    border:1px solid var(--line); border-radius:9px;
+    color:var(--ink); font-family:'Barlow',sans-serif; font-size:15px; cursor:pointer;
   }
   select:focus-visible{ outline:2px solid var(--go); outline-offset:1px; }
   .picker::after{
-    content:'';
-    position:absolute; right:16px; top:50%;
-    width:7px; height:7px;
-    margin-top:-5px;
-    border-right:1.7px solid var(--muted);
-    border-bottom:1.7px solid var(--muted);
-    transform:rotate(45deg);
-    pointer-events:none;
+    content:''; position:absolute; right:16px; top:50%; width:7px; height:7px; margin-top:-5px;
+    border-right:1.7px solid var(--muted); border-bottom:1.7px solid var(--muted);
+    transform:rotate(45deg); pointer-events:none;
   }
   option, optgroup{ background:#172C24; color:#E9F0EA; }
 
-  /* ---------- course rows ---------- */
-
-  .course{
-    border-top:1px solid var(--line);
-    padding:16px 0 18px;
+  .course{ border-top:1px solid var(--line); padding:15px 0 16px; }
+  .chead{ display:flex; align-items:baseline; gap:8px; margin-bottom:9px; }
+  .open{
+    flex:1; text-align:left; border:0; background:transparent; cursor:pointer; padding:0;
+    color:var(--ink); font-family:'Barlow Condensed',sans-serif; font-size:20px; font-weight:600;
   }
-
-  .head{
-    display:flex; align-items:baseline; gap:8px;
-    margin-bottom:11px;
-  }
-  .name{
-    font-family:'Barlow Condensed',sans-serif;
-    font-size:21px; font-weight:600;
-    letter-spacing:.01em;
-    line-height:1.1;
-  }
-  .area{ color:var(--muted); font-size:12.5px; flex:1; }
-
+  .open small{ font-family:'Barlow',sans-serif; color:var(--muted); font-size:12.5px; font-weight:400; margin-left:7px; }
+  .open:focus-visible{ outline:2px solid var(--go); outline-offset:2px; }
   .drop{
-    flex:0 0 auto;
-    width:26px; height:26px;
-    border:0; border-radius:50%;
-    background:transparent;
-    color:var(--dead);
-    font-size:19px; line-height:1;
-    cursor:pointer;
+    flex:0 0 auto; width:26px; height:26px; border:0; border-radius:50%;
+    background:transparent; color:var(--dead); font-size:19px; line-height:1; cursor:pointer;
   }
   .drop:hover{ color:var(--stop); }
   .drop:focus-visible{ outline:2px solid var(--go); outline-offset:1px; }
 
-  .week{
-    display:grid;
-    grid-template-columns:repeat(7,1fr);
-    gap:5px;
-  }
-
+  .week{ display:grid; grid-template-columns:repeat(7,1fr); gap:5px; }
   .day{
-    border:0;
-    padding:7px 2px 8px;
-    border-radius:7px;
-    background:var(--raised);
-    color:var(--ink);
-    font-family:'Barlow Condensed',sans-serif;
-    text-align:center;
-    cursor:pointer;
+    padding:7px 2px 8px; border-radius:7px; background:var(--raised);
+    font-family:'Barlow Condensed',sans-serif; text-align:center;
     display:flex; flex-direction:column; align-items:center; gap:5px;
-    transition:box-shadow .15s;
   }
-  .day:focus-visible{ outline:2px solid var(--ink); outline-offset:1px; }
-  .day[aria-selected="true"]{ box-shadow:inset 0 0 0 1.5px var(--ink); }
-
-  .dow{ font-size:12px; font-weight:600; color:var(--muted); letter-spacing:.04em; }
+  .dow{ font-size:12px; font-weight:600; color:var(--muted); }
   .date{ font-size:11px; color:var(--dead); margin-top:-4px; }
-  .lamp{ width:15px; height:15px; border-radius:50%; }
-  .lamp.go{ background:var(--go); }
-  .lamp.hold{ background:var(--hold); }
-  .lamp.stop{ background:var(--stop); }
-  .lamp.none{ background:var(--dead); }
   .deg{ font-size:15px; font-weight:600; line-height:1; }
+  .ground{ display:grid; grid-template-columns:repeat(7,1fr); gap:5px; margin-top:4px; }
+  .gbar{ height:6px; border-radius:3px; }
 
-  .detail{
-    margin-top:12px;
-    padding:11px 13px;
-    background:var(--raised);
-    border-left:3px solid var(--dead);
-    border-radius:0 7px 7px 0;
-    font-size:13.5px;
+  .mini{
+    border:1px solid var(--line); border-radius:6px; background:transparent; color:var(--muted);
+    font-family:'Barlow',sans-serif; font-size:12px; padding:5px 9px; cursor:pointer; margin-right:7px;
   }
-  .detail.go{ border-left-color:var(--go); }
-  .detail.hold{ border-left-color:var(--hold); }
-  .detail.stop{ border-left-color:var(--stop); }
-  .detail b{ font-weight:600; }
-  .detail span{ color:var(--muted); }
+  .mini:hover{ color:var(--ink); border-color:var(--muted); }
+  .mini:focus-visible{ outline:2px solid var(--go); outline-offset:1px; }
 
-  .loading, .failed{ color:var(--muted); font-size:13.5px; padding:4px 0; }
+  .snippet{
+    margin-top:12px; padding:11px 13px; background:var(--raised); border-radius:7px;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:11.5px;
+    color:var(--muted); word-break:break-all; line-height:1.6;
+  }
+
+  .go{ background:var(--go); }
+  .hold{ background:var(--hold); }
+  .stop{ background:var(--stop); }
+  .none{ background:var(--dead); }
+  .firm{ background:var(--firm); }
+  .soft{ background:var(--soft); }
+  .sodden{ background:var(--sodden); }
+
+  .loading, .failed, .empty{ color:var(--muted); font-size:13.5px; padding:10px 0; }
   .failed{ color:var(--hold); }
 
   /* ---------- footer ---------- */
 
-  .empty{
-    border-top:1px solid var(--line);
-    padding:34px 0;
-    color:var(--muted);
-    font-size:14px;
-  }
-
   .key{
-    display:flex; flex-wrap:wrap; gap:14px;
-    border-top:1px solid var(--line);
-    margin-top:6px; padding-top:16px;
+    display:flex; flex-wrap:wrap; gap:8px 14px;
+    border-top:1px solid var(--line); margin-top:20px; padding-top:16px;
     font-size:12.5px; color:var(--muted);
   }
   .key i{ display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:6px; }
+  .key i.bar{ width:14px; height:5px; border-radius:3px; }
+  .key b{ width:100%; font-weight:600; color:var(--dead); font-size:11px; margin-top:4px; }
 
   .credit{ margin-top:14px; font-size:11.5px; color:var(--dead); line-height:1.6; }
   .credit a{ color:var(--dead); }
 
-  @media (prefers-reduced-motion:reduce){
-    *{ animation:none !important; transition:none !important; }
-  }
+  @media (prefers-reduced-motion:reduce){ *{ animation:none !important; transition:none !important; } }
 </style>
 </head>
 <body>
@@ -218,94 +259,132 @@
 <header>
   <div>
     <h1>Tee Forecast</h1>
-    <div class="stamp" id="stamp">Mornings, 6am to noon</div>
+    <div class="stamp" id="stamp">Loading&hellip;</div>
   </div>
   <button id="refresh" aria-label="Refresh forecast">
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M20 11a8 8 0 1 0-.9 4.5"/><path d="M20 5v6h-6"/>
-    </svg>
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-.9 4.5"/><path d="M20 5v6h-6"/></svg>
   </button>
 </header>
 
-<div class="picker">
-  <select id="add" aria-label="Add a course">
-    <option value="">Add a course</option>
-  </select>
+<div class="tabs" role="tablist">
+  <button class="tab" id="tab-course" role="tab" aria-selected="true" aria-controls="view-course">Course</button>
+  <button class="tab" id="tab-lists"  role="tab" aria-selected="false" aria-controls="view-lists">Lists</button>
 </div>
 
-<main id="board"></main>
+<section class="view" id="view-course" role="tabpanel" aria-labelledby="tab-course">
+  <div class="findwrap">
+    <input id="find" type="text" autocomplete="off" placeholder="Search for a course" aria-label="Search for a course">
+    <button id="clear" type="button" aria-label="Clear search" hidden>&times;</button>
+  </div>
+  <div id="detail"></div>
+</section>
+
+<section class="view" id="view-lists" role="tabpanel" aria-labelledby="tab-lists" hidden></section>
 
 <div class="key">
-  <span><i style="background:#3FBF6A"></i>Good to play</span>
-  <span><i style="background:#E8A33D"></i>Drizzle or heat</span>
-  <span><i style="background:#E0523F"></i>Storms or heavy rain</span>
+  <b>Play</b>
+  <span><i class="go"></i>Good</span>
+  <span><i class="hold"></i>Drizzle or heat</span>
+  <span><i class="stop"></i>Storms or heavy rain</span>
+  <b>Ground</b>
+  <span><i class="bar firm"></i>Firm</span>
+  <span><i class="bar soft"></i>Soft</span>
+  <span><i class="bar sodden"></i>Sodden</span>
 </div>
 
 <p class="credit">
-  Forecasts from <a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo</a>,
-  free for non-commercial use. Ratings cover 6am&ndash;12pm local time at each course.
+  Forecasts from <a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo</a>, free for non-commercial use.
+  Ground is inferred from 72&nbsp;hours of rainfall and modelled soil moisture &mdash; it is not a course report,
+  and drainage varies a lot between clubs.
 </p>
 
 <script>
-/* ------------------------------------------------------------------
-   COURSES — coordinates are of the club itself, not the town centre.
-   Add your own: copy a row, set name / area / lat / lon / region.
------------------------------------------------------------------- */
+/* ==================================================================
+   1. COURSES — coordinates are the club itself, not the town centre.
+   ================================================================== */
 const COURSES = [
-  { id:'wackwack',   name:'Wack Wack',            area:'Mandaluyong',      region:'Metro Manila', lat:14.5898, lon:121.0493 },
-  { id:'manilagolf', name:'Manila Golf',          area:'Makati',           region:'Metro Manila', lat:14.5505, lon:121.0391 },
-  { id:'intramuros', name:'Club Intramuros',      area:'Manila',           region:'Metro Manila', lat:14.5929, lon:120.9699 },
-  { id:'villamor',   name:'Villamor',             area:'Pasay',            region:'Metro Manila', lat:14.5250, lon:121.0210 },
-  { id:'navy',       name:'Philippine Navy',      area:'Taguig',           region:'Metro Manila', lat:14.5213, lon:121.0320 },
-  { id:'army',       name:'Philippine Army',      area:'Taguig',           region:'Metro Manila', lat:14.5311, lon:121.0407 },
-  { id:'aguinaldo',  name:'Camp Aguinaldo',       area:'Quezon City',      region:'Metro Manila', lat:14.6055, lon:121.0581 },
-  { id:'veterans',   name:'Veterans Memorial',    area:'Quezon City',      region:'Metro Manila', lat:14.6569, lon:121.0385 },
+  { id:'wackwack',   name:'Wack Wack',         area:'Mandaluyong',      region:'Metro Manila', lat:14.5898, lon:121.0493 },
+  { id:'manilagolf', name:'Manila Golf',       area:'Makati',           region:'Metro Manila', lat:14.5505, lon:121.0391 },
+  { id:'intramuros', name:'Club Intramuros',   area:'Manila',           region:'Metro Manila', lat:14.5929, lon:120.9699 },
+  { id:'villamor',   name:'Villamor',          area:'Pasay',            region:'Metro Manila', lat:14.5250, lon:121.0210 },
+  { id:'navy',       name:'Philippine Navy',   area:'Taguig',           region:'Metro Manila', lat:14.5213, lon:121.0320 },
+  { id:'army',       name:'Philippine Army',   area:'Taguig',           region:'Metro Manila', lat:14.5311, lon:121.0407 },
+  { id:'aguinaldo',  name:'Camp Aguinaldo',    area:'Quezon City',      region:'Metro Manila', lat:14.6055, lon:121.0581 },
+  { id:'veterans',   name:'Veterans Memorial', area:'Quezon City',      region:'Metro Manila', lat:14.6569, lon:121.0385 },
 
-  { id:'valley',     name:'Valley',               area:'Antipolo',         region:'Rizal',        lat:14.6043, lon:121.1409 },
-  { id:'foresthills',name:'Forest Hills',         area:'Antipolo',         region:'Rizal',        lat:14.6394, lon:121.1973 },
-  { id:'sunvalley',  name:'Sun Valley',           area:'Antipolo',         region:'Rizal',        lat:14.6451, lon:121.1812 },
-  { id:'eastridge',  name:'Eastridge',            area:'Angono',           region:'Rizal',        lat:14.5265, lon:121.1859 },
+  { id:'valley',      name:'Valley',            area:'Antipolo',        region:'Rizal',  lat:14.6043, lon:121.1409 },
+  { id:'foresthills', name:'Forest Hills',      area:'Antipolo',        region:'Rizal',  lat:14.6394, lon:121.1973 },
+  { id:'sunvalley',   name:'Sun Valley',        area:'Antipolo',        region:'Rizal',  lat:14.6451, lon:121.1812 },
+  { id:'eastridge',   name:'Eastridge',         area:'Angono',          region:'Rizal',  lat:14.5265, lon:121.1859 },
 
-  { id:'southwoods', name:'Manila Southwoods',    area:'Carmona',          region:'Cavite',       lat:14.3219, lon:121.0447 },
-  { id:'orchard',    name:'The Orchard',          area:'Dasmari\u00f1as',  region:'Cavite',       lat:14.3516, lon:120.9617 },
-  { id:'riviera',    name:'Riviera',              area:'Silang',           region:'Cavite',       lat:14.2350, lon:120.9478 },
-  { id:'southforbes',name:'South Forbes',         area:'Silang',           region:'Cavite',       lat:14.2426, lon:121.0387 },
-  { id:'eagleridge', name:'Eagle Ridge',          area:'General Trias',    region:'Cavite',       lat:14.2520, lon:120.9069 },
-  { id:'sherwood',   name:'Sherwood Hills',       area:'Trece Martires',   region:'Cavite',       lat:14.2589, lon:120.8927 },
+  { id:'southwoods',  name:'Manila Southwoods', area:'Carmona',         region:'Cavite', lat:14.3219, lon:121.0447 },
+  { id:'orchard',     name:'The Orchard',       area:'Dasmari\u00f1as', region:'Cavite', lat:14.3516, lon:120.9617 },
+  { id:'riviera',     name:'Riviera',           area:'Silang',          region:'Cavite', lat:14.2350, lon:120.9478 },
+  { id:'southforbes', name:'South Forbes',      area:'Silang',          region:'Cavite', lat:14.2426, lon:121.0387 },
+  { id:'eagleridge',  name:'Eagle Ridge',       area:'General Trias',   region:'Cavite', lat:14.2520, lon:120.9069 },
+  { id:'sherwood',    name:'Sherwood Hills',    area:'Trece Martires',  region:'Cavite', lat:14.2589, lon:120.8927 },
 
-  { id:'staelena',   name:'Sta. Elena',           area:'Sta. Rosa',        region:'Laguna',       lat:14.2400, lon:121.0904 },
-  { id:'countryclub',name:'The Country Club',     area:'Sta. Rosa',        region:'Laguna',       lat:14.2293, lon:121.0722 },
-  { id:'canlubang',  name:'Canlubang',            area:'Calamba',          region:'Laguna',       lat:14.2002, lon:121.0439 },
-  { id:'greenfield', name:'Ayala Greenfield',     area:'Calamba',          region:'Laguna',       lat:14.1534, lon:121.1600 },
-  { id:'hallowridge',name:'Hallow Ridge',         area:'San Pedro',        region:'Laguna',       lat:14.3566, lon:121.0283 },
-  { id:'caliraya',   name:'Caliraya Springs',     area:'Cavinti',          region:'Laguna',       lat:14.2869, lon:121.5557 },
+  { id:'staelena',    name:'Sta. Elena',        area:'Sta. Rosa',       region:'Laguna', lat:14.2400, lon:121.0904 },
+  { id:'countryclub', name:'The Country Club',  area:'Sta. Rosa',       region:'Laguna', lat:14.2293, lon:121.0722 },
+  { id:'canlubang',   name:'Canlubang',         area:'Calamba',         region:'Laguna', lat:14.2002, lon:121.0439 },
+  { id:'greenfield',  name:'Ayala Greenfield',  area:'Calamba',         region:'Laguna', lat:14.1534, lon:121.1600 },
+  { id:'hallowridge', name:'Hallow Ridge',      area:'San Pedro',       region:'Laguna', lat:14.3566, lon:121.0283 },
+  { id:'caliraya',    name:'Caliraya Springs',  area:'Cavinti',         region:'Laguna', lat:14.2869, lon:121.5557 },
 
-  { id:'northwoods', name:'Royal Northwoods',     area:'San Rafael',       region:'North',        lat:14.9927, lon:120.9652 },
-  { id:'pradera',    name:'Pradera Verde',        area:'Lubao',            region:'North',        lat:14.8880, lon:120.4972 },
-  { id:'beverly',    name:'Beverly Place',        area:'Mexico, Pampanga', region:'North',        lat:15.0715, lon:120.6882 },
-  { id:'dheights',   name:"D'Heights",            area:'Angeles',          region:'North',        lat:15.1790, lon:120.4873 }
+  { id:'northwoods',  name:'Royal Northwoods',  area:'San Rafael',       region:'North', lat:14.9927, lon:120.9652 },
+  { id:'pradera',     name:'Pradera Verde',     area:'Lubao',            region:'North', lat:14.8880, lon:120.4972 },
+  { id:'beverly',     name:'Beverly Place',     area:'Mexico, Pampanga', region:'North', lat:15.0715, lon:120.6882 },
+  { id:'dheights',    name:"D'Heights",         area:'Angeles',          region:'North', lat:15.1790, lon:120.4873 }
 ];
 
-/* ------------------------------------------------------------------
-   TUNING — the numbers that decide the colours. Edit to taste.
------------------------------------------------------------------- */
+/* ==================================================================
+   2. BUILT-IN LISTS — these live in the file, so they work in any
+      browser on any device. Paste new ones here from the Lists tab.
+   ================================================================== */
+const PRESETS = [
+  { name:'The usual',    ids:['wackwack','southwoods','staelena','eastridge'] },
+  { name:'City courses', ids:['wackwack','manilagolf','intramuros','villamor','navy','army'] },
+  { name:'South run',    ids:['southwoods','staelena','countryclub','orchard','riviera','canlubang'] },
+  { name:'East side',    ids:['valley','foresthills','sunvalley','eastridge'] }
+];
+
+/* ==================================================================
+   3. TUNING — the numbers that decide the colours.
+   ================================================================== */
 const RULES = {
-  window:      [6, 11],  // tee window, inclusive hours (6am through 11am)
-  heavyPeak:   4,        // mm in any single hour  -> red
-  heavyTotal:  10,       // mm across the window   -> red
-  gustRed:     45,       // km/h                   -> red
-  wetTotal:    1,        // mm across the window   -> amber
-  popAmber:    60,       // % chance of rain       -> amber
-  gustAmber:   30,       // km/h                   -> amber
-  feelsAmber:  38        // apparent °C            -> amber
+  window:     [6, 11],   // tee window used for the daily verdict
+  strip:      [5, 19],   // hours shown in the detail view
+
+  heavyPeak:  4,         // mm in any one hour   -> red
+  heavyTotal: 10,        // mm across the window -> red
+  gustRed:    45,        // km/h                 -> red
+  wetTotal:   1,         // mm across the window -> amber
+  popAmber:   60,        // % rain chance        -> amber
+  gustAmber:  30,        // km/h                 -> amber
+  feelsAmber: 38,        // apparent degrees C   -> amber
+
+  rainSoft:   20,        // mm over 72h          -> soft
+  rainSodden: 50,        // mm over 72h          -> sodden
+  soilSoft:   0.35,      // m3/m3 at 3-9cm       -> soft
+  soilSodden: 0.42,      // m3/m3 at 3-9cm       -> sodden
+
+  barMax:     6          // mm that fills the rain bar
 };
 
-const STORE = 'teesheet.courses';
-const CACHE = 'teesheet.cache';
+const K = {
+  sel:'teesheet.courses', cache:'teesheet.cache', notes:'teesheet.notes',
+  lists:'teesheet.lists', current:'teesheet.current', list:'teesheet.activelist'
+};
 
-let selected = load(STORE, ['wackwack','southwoods','staelena','eastridge']);
-let cache    = load(CACHE, {});
-let openDay  = {};
+let selected = load(K.sel, PRESETS[0].ids.slice());
+let cache    = load(K.cache, {});
+let notes    = load(K.notes, {});
+let myLists  = load(K.lists, []);
+let current  = load(K.current, 'wackwack');
+let active   = load(K.list, PRESETS[0].name);
+let query    = '';
+let editing  = false;
+let snippet  = null;
 
 function load(key, fallback){
   try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
@@ -314,197 +393,523 @@ function load(key, fallback){
 function save(key, value){
   try { localStorage.setItem(key, JSON.stringify(value)); } catch(e){}
 }
+function course(id){ return COURSES.find(function(c){ return c.id === id; }); }
+function needed(){
+  const all = selected.slice();
+  if(current && all.indexOf(current) < 0) all.push(current);
+  return all;
+}
 
-/* ---------- forecast ---------- */
+/* ==================================================================
+   4. FORECAST
+   ================================================================== */
 
 function url(c){
   return 'https://api.open-meteo.com/v1/forecast'
     + '?latitude=' + c.lat + '&longitude=' + c.lon
-    + '&hourly=temperature_2m,apparent_temperature,precipitation,precipitation_probability,weather_code,wind_gusts_10m'
-    + '&timezone=auto&forecast_days=7';
+    + '&hourly=temperature_2m,apparent_temperature,precipitation,precipitation_probability,'
+    + 'weather_code,wind_gusts_10m,soil_moisture_3_to_9cm'
+    + '&timezone=auto&past_days=3&forecast_days=7';
 }
 
 async function fetchCourse(c){
   const res = await fetch(url(c));
   if(!res.ok) throw new Error('HTTP ' + res.status);
-  const raw = await res.json();
-  const h = raw.hourly;
-  const byDate = {};
+  const h = (await res.json()).hourly;
+  const soilSeries = h.soil_moisture_3_to_9cm || null;
 
-  for(let i = 0; i < h.time.length; i++){
-    const stamp = h.time[i];
-    const hour  = parseInt(stamp.slice(11, 13), 10);
-    if(hour < RULES.window[0] || hour > RULES.window[1]) continue;
-    const date = stamp.slice(0, 10);
-    (byDate[date] = byDate[date] || []).push({
-      hour: hour,
+  const rows = h.time.map(function(t, i){
+    return {
+      ms:   new Date(t).getTime(),
+      date: t.slice(0, 10),
+      hour: parseInt(t.slice(11, 13), 10),
       temp: h.temperature_2m[i],
       feels:h.apparent_temperature[i],
-      mm:   h.precipitation[i],
+      mm:   h.precipitation[i] || 0,
       pop:  h.precipitation_probability[i],
       code: h.weather_code[i],
-      gust: h.wind_gusts_10m[i]
-    });
-  }
-
-  return Object.keys(byDate).sort().map(function(date){
-    return Object.assign({ date: date }, rate(byDate[date]));
+      gust: h.wind_gusts_10m[i],
+      soil: soilSeries ? soilSeries[i] : null
+    };
   });
+
+  // past_days=3 + forecast_days=7 gives 10 dates; the last 7 are today onward.
+  const seen = [];
+  rows.forEach(function(r){ if(seen.indexOf(r.date) < 0) seen.push(r.date); });
+  const dates = seen.sort().slice(-7);
+
+  const days = dates.map(function(date){
+    const tee = rows.filter(function(r){
+      return r.date === date && r.hour >= RULES.window[0] && r.hour <= RULES.window[1];
+    });
+    if(!tee.length) return null;
+
+    const start  = tee[0].ms;
+    const prior  = rows.filter(function(r){ return r.ms < start && r.ms >= start - 72 * 3600 * 1000; });
+    const rain72 = prior.reduce(function(s, r){ return s + r.mm; }, 0);
+
+    return Object.assign({ date:date }, rate(tee), ground(rain72, tee[0].soil), { rain72:rain72 });
+  }).filter(Boolean);
+
+  // Only the first two days get an hourly strip, so the cache stays small.
+  const hours = {};
+  dates.slice(0, 2).forEach(function(date){
+    hours[date] = rows
+      .filter(function(r){ return r.date === date && r.hour >= RULES.strip[0] && r.hour <= RULES.strip[1]; })
+      .map(function(r){
+        return { hour:r.hour, temp:Math.round(r.temp), feels:Math.round(r.feels),
+                 mm:r.mm, pop:r.pop, level:hourLevel(r) };
+      });
+  });
+
+  return { days:days, hours:hours };
+}
+
+function hourLevel(r){
+  if(r.code >= 95 || r.code === 65 || r.code === 67 || r.code === 82 || r.mm >= RULES.heavyPeak) return 'stop';
+  if(r.mm >= 0.2 || (r.code >= 51 && r.code <= 57) || (r.code >= 61 && r.code <= 63) ||
+     r.code === 80 || r.code === 81 || r.feels >= RULES.feelsAmber || r.gust >= RULES.gustAmber) return 'hold';
+  return 'go';
 }
 
 function rate(hrs){
   const max   = function(f){ return Math.max.apply(null, hrs.map(f)); };
   const codes = hrs.map(function(h){ return h.code; });
-  const total = hrs.reduce(function(s,h){ return s + h.mm; }, 0);
+  const total = hrs.reduce(function(s, h){ return s + h.mm; }, 0);
   const peak  = max(function(h){ return h.mm; });
   const feels = max(function(h){ return h.feels; });
   const temp  = max(function(h){ return h.temp; });
   const pop   = max(function(h){ return h.pop; });
   const gust  = max(function(h){ return h.gust; });
 
-  const stormHour = hrs.find(function(h){ return h.code >= 95; });
-  const wetHour   = hrs.find(function(h){ return h.mm >= 0.2; });
+  const storm = hrs.find(function(h){ return h.code >= 95; });
+  const wet   = hrs.find(function(h){ return h.mm >= 0.2; });
 
-  const base = { temp: Math.round(temp), feels: Math.round(feels), mm: total, pop: pop, gust: Math.round(gust) };
-  const out  = function(level, reason){ return Object.assign({ level: level, reason: reason }, base); };
+  const base = { temp:Math.round(temp), feels:Math.round(feels), mm:total, pop:pop, gust:Math.round(gust) };
+  const out  = function(level, reason){ return Object.assign({ level:level, reason:reason }, base); };
 
-  // --- red ---
-  if(stormHour)                                   return out('stop', 'Thunderstorms from ' + clock(stormHour.hour));
+  if(storm)
+    return out('stop', 'Thunderstorms from ' + clock(storm.hour));
   if(codes.some(function(c){ return c===65 || c===67 || c===82; }))
-                                                  return out('stop', 'Heavy rain in the window');
-  if(peak >= RULES.heavyPeak)                     return out('stop', 'Downpour, up to ' + peak.toFixed(1) + 'mm in an hour');
-  if(total >= RULES.heavyTotal)                   return out('stop', 'Sustained rain, ' + total.toFixed(0) + 'mm across the morning');
-  if(gust >= RULES.gustRed)                       return out('stop', 'Gusts to ' + Math.round(gust) + ' km/h');
+    return out('stop', 'Heavy rain through the tee window');
+  if(peak >= RULES.heavyPeak)
+    return out('stop', 'Downpour, up to ' + peak.toFixed(1) + 'mm in an hour');
+  if(total >= RULES.heavyTotal)
+    return out('stop', 'Sustained rain, ' + total.toFixed(0) + 'mm across the morning');
+  if(gust >= RULES.gustRed)
+    return out('stop', 'Gusts to ' + Math.round(gust) + ' km/h');
 
-  // --- amber ---
   if(codes.some(function(c){ return c>=51 && c<=57; }))
-                                                  return out('hold', 'Drizzle' + (wetHour ? ' from ' + clock(wetHour.hour) : ''));
-  if(total >= RULES.wetTotal)                     return out('hold', 'Showers, ' + total.toFixed(1) + 'mm' + (wetHour ? ' from ' + clock(wetHour.hour) : ''));
+    return out('hold', 'Drizzle' + (wet ? ' from ' + clock(wet.hour) : ''));
+  if(total >= RULES.wetTotal)
+    return out('hold', 'Showers, ' + total.toFixed(1) + 'mm' + (wet ? ' from ' + clock(wet.hour) : ''));
   if(codes.some(function(c){ return (c>=61 && c<=63) || c===80 || c===81; }))
-                                                  return out('hold', 'Passing showers likely');
-  if(feels >= RULES.feelsAmber)                   return out('hold', 'Hot and dry, feels like ' + Math.round(feels) + '\u00b0');
-  if(gust >= RULES.gustAmber)                     return out('hold', 'Breezy, gusts to ' + Math.round(gust) + ' km/h');
-  if(pop >= RULES.popAmber)                       return out('hold', pop + '% chance of rain');
+    return out('hold', 'Passing showers likely');
+  if(feels >= RULES.feelsAmber)
+    return out('hold', 'Hot and dry, feels like ' + Math.round(feels) + '\u00b0');
+  if(gust >= RULES.gustAmber)
+    return out('hold', 'Breezy, gusts to ' + Math.round(gust) + ' km/h');
+  if(pop >= RULES.popAmber)
+    return out('hold', pop + '% chance of rain');
 
-  // --- green ---
   return out('go', codes.every(function(c){ return c === 0; })
     ? 'Clear all morning'
     : 'Dry, ' + Math.round(temp) + '\u00b0 by noon');
+}
+
+function ground(rain72, soil){
+  const soaked = (soil != null && soil >= RULES.soilSodden) || rain72 >= RULES.rainSodden;
+  const damp   = (soil != null && soil >= RULES.soilSoft)   || rain72 >= RULES.rainSoft;
+  if(soaked) return { g:'sodden', gtext:'Sodden \u2014 cart path likely' };
+  if(damp)   return { g:'soft',   gtext:'Soft underfoot, little run out' };
+  return       { g:'firm',   gtext:'Firm and running' };
 }
 
 function clock(h){
   if(h === 12) return 'noon';
   return (h % 12 === 0 ? 12 : h % 12) + (h < 12 ? 'am' : 'pm');
 }
+function shortClock(h){
+  if(h === 12) return '12p';
+  return (h % 12 === 0 ? 12 : h % 12) + (h < 12 ? 'a' : 'p');
+}
+function longDate(d){
+  return new Date(d + 'T00:00:00').toLocaleDateString(undefined, { weekday:'long', month:'short', day:'numeric' });
+}
 
-/* ---------- rendering ---------- */
+/* ==================================================================
+   5. COURSE VIEW
+   ================================================================== */
 
-const board  = document.getElementById('board');
+const find   = document.getElementById('find');
+const clearB = document.getElementById('clear');
+const detail = document.getElementById('detail');
 const stamp  = document.getElementById('stamp');
-const picker = document.getElementById('add');
 
-function buildPicker(){
-  picker.innerHTML = '<option value="">Add a course</option>';
+function matches(q){
+  const t = q.trim().toLowerCase();
+  if(!t) return [];
+  return COURSES.filter(function(c){
+    return (c.name + ' ' + c.area + ' ' + c.region).toLowerCase().indexOf(t) >= 0;
+  }).slice(0, 8);
+}
+
+function renderCourse(){
+  detail.innerHTML = '';
+  clearB.hidden = !query;
+
+  if(query){
+    const hits = matches(query);
+    if(!hits.length){
+      detail.innerHTML = '<p class="nohit">No course by that name.</p>';
+      return;
+    }
+    const box = document.createElement('div');
+    box.className = 'results';
+    hits.forEach(function(c){
+      const b = document.createElement('button');
+      b.className = 'hit';
+      b.type = 'button';
+      b.innerHTML = '<span></span><small></small>';
+      b.querySelector('span').textContent = c.name;
+      b.querySelector('small').textContent = c.area;
+      b.onclick = function(){ openCourse(c.id); };
+      box.appendChild(b);
+    });
+    detail.appendChild(box);
+    return;
+  }
+
+  const c = course(current);
+  if(!c){
+    detail.innerHTML = '<p class="nohit">Search for a course to begin.</p>';
+    return;
+  }
+
+  detail.insertAdjacentHTML('beforeend',
+    '<div class="title"></div><div class="sub"></div>');
+  detail.querySelector('.title').textContent = c.name;
+  detail.querySelector('.sub').textContent = c.area + ' \u00b7 ' + c.region;
+
+  // --- note ---
+  if(editing){
+    const input = document.createElement('input');
+    input.className = 'noteinput';
+    input.value = notes[c.id] || '';
+    input.placeholder = 'e.g. greens punched until 20 Sep';
+    input.onkeydown = function(e){
+      if(e.key === 'Enter') input.blur();
+      if(e.key === 'Escape'){ editing = false; renderCourse(); }
+    };
+    input.onblur = function(){
+      const v = input.value.trim();
+      if(v) notes[c.id] = v; else delete notes[c.id];
+      save(K.notes, notes);
+      editing = false; renderCourse();
+    };
+    detail.appendChild(input);
+    setTimeout(function(){ input.focus(); }, 0);
+  } else {
+    const nb = document.createElement('button');
+    nb.type = 'button';
+    nb.className = 'note' + (notes[c.id] ? '' : ' blank');
+    nb.textContent = notes[c.id] || '+ add a note';
+    nb.onclick = function(){ editing = true; renderCourse(); };
+    detail.appendChild(nb);
+  }
+
+  const entry = cache[c.id];
+  if(!entry){
+    detail.insertAdjacentHTML('beforeend', '<p class="loading">Checking the forecast\u2026</p>');
+    return;
+  }
+  if(entry.error){
+    detail.insertAdjacentHTML('beforeend',
+      '<p class="failed">Could not reach the weather service. Tap refresh to try again.</p>');
+    return;
+  }
+
+  const now  = new Date();
+  const nowH = now.getHours();
+  const dates = Object.keys(entry.hours).sort();
+
+  dates.forEach(function(date, idx){
+    const d = entry.days.find(function(x){ return x.date === date; });
+    if(!d) return;
+
+    const block = document.createElement('section');
+    block.className = 'dayblock';
+
+    const head = document.createElement('div');
+    head.className = 'dayhead';
+    head.innerHTML = '<span class="lamp ' + d.level + '"></span>' +
+                     '<span class="daydate"></span>' +
+                     '<span class="dayhigh"></span>';
+    head.querySelector('.daydate').textContent = (idx === 0 ? 'Today \u00b7 ' : 'Tomorrow \u00b7 ') + longDate(date);
+    head.querySelector('.dayhigh').textContent = d.temp + '\u00b0 / feels ' + d.feels + '\u00b0';
+    block.appendChild(head);
+
+    block.insertAdjacentHTML('beforeend', '<p class="verdict"></p>');
+    block.querySelector('.verdict').textContent = d.reason;
+
+    const gl = document.createElement('p');
+    gl.className = 'gline';
+    gl.innerHTML = '<i class="' + d.g + '"></i>' + d.gtext +
+                   ' <span>after ' + d.rain72.toFixed(0) + 'mm in the previous 72h</span>';
+    block.appendChild(gl);
+
+    const strip = document.createElement('div');
+    strip.className = 'hours';
+    entry.hours[date].forEach(function(r){
+      const cell = document.createElement('div');
+      const isNow = idx === 0 && r.hour === nowH;
+      cell.className = 'hcell' + (isNow ? ' now' : '');
+      const h = Math.min(r.mm / RULES.barMax, 1) * 34;
+      cell.innerHTML =
+        '<span class="hr">' + shortClock(r.hour) + '</span>' +
+        '<span class="htemp">' + r.temp + '\u00b0</span>' +
+        '<span class="barwrap"><span class="bar" style="height:' + (r.mm > 0 ? Math.max(h, 2) : 0) + 'px"></span></span>' +
+        '<span class="hmm">' + (r.mm >= 0.1 ? r.mm.toFixed(1) : '') + '</span>' +
+        '<span class="htick ' + r.level + '"></span>';
+      cell.title = clock(r.hour) + ' \u00b7 ' + r.temp + '\u00b0 \u00b7 ' + r.mm.toFixed(1) + 'mm \u00b7 ' + r.pop + '%';
+      strip.appendChild(cell);
+    });
+    block.appendChild(strip);
+    block.insertAdjacentHTML('beforeend',
+      '<p class="scrollnote">5am to 7pm \u00b7 scroll sideways \u00b7 bar height is rainfall</p>');
+
+    detail.appendChild(block);
+  });
+}
+
+function openCourse(id){
+  current = id;
+  save(K.current, current);
+  query = ''; find.value = ''; editing = false;
+  showTab('course');
+  renderCourse();
+  if(!cache[id]) refresh();
+}
+
+find.oninput = function(){ query = find.value; renderCourse(); };
+clearB.onclick = function(){ query = ''; find.value = ''; renderCourse(); find.focus(); };
+
+/* ==================================================================
+   6. LISTS VIEW
+   ================================================================== */
+
+const listView = document.getElementById('view-lists');
+
+function allLists(){
+  return PRESETS.map(function(l){ return { name:l.name, ids:l.ids, local:false }; })
+    .concat(myLists.map(function(l){ return { name:l.name, ids:l.ids, local:true }; }));
+}
+
+function renderLists(){
+  listView.innerHTML = '';
+
+  // --- list chips ---
+  listView.insertAdjacentHTML('beforeend', '<h2 class="sect">Lists</h2>');
+  const chips = document.createElement('div');
+  chips.className = 'chips';
+  allLists().forEach(function(l, i){
+    const b = document.createElement('button');
+    b.className = 'chip';
+    b.type = 'button';
+    b.textContent = l.name + (l.local ? ' \u2022' : '');
+    b.setAttribute('aria-pressed', String(l.name === active));
+    b.onclick = function(){
+      active = l.name;
+      selected = l.ids.filter(function(x){ return !!course(x); });
+      save(K.list, active); save(K.sel, selected);
+      renderLists(); refresh();
+    };
+    chips.appendChild(b);
+  });
+  listView.appendChild(chips);
+  listView.insertAdjacentHTML('beforeend',
+    '<p class="hint">Lists marked \u2022 are saved in this browser only. The rest live in the file and open the same way anywhere.</p>');
+
+  // --- picker ---
+  const pick = document.createElement('div');
+  pick.className = 'picker';
+  const sel = document.createElement('select');
+  sel.setAttribute('aria-label', 'Add a course to this list');
+  sel.innerHTML = '<option value="">Add a course</option>';
   const regions = [];
   COURSES.forEach(function(c){ if(regions.indexOf(c.region) < 0) regions.push(c.region); });
-
   regions.forEach(function(region){
-    const group = document.createElement('optgroup');
-    group.label = region;
+    const g = document.createElement('optgroup');
+    g.label = region;
     COURSES.filter(function(c){ return c.region === region && selected.indexOf(c.id) < 0; })
       .forEach(function(c){
         const o = document.createElement('option');
         o.value = c.id;
         o.textContent = c.name + '  \u00b7  ' + c.area;
-        group.appendChild(o);
+        g.appendChild(o);
       });
-    if(group.children.length) picker.appendChild(group);
+    if(g.children.length) sel.appendChild(g);
   });
-}
+  sel.onchange = function(){
+    if(!sel.value) return;
+    selected.push(sel.value);
+    save(K.sel, selected);
+    renderLists(); refresh();
+  };
+  pick.appendChild(sel);
+  listView.appendChild(pick);
 
-function render(){
-  board.innerHTML = '';
-
+  // --- the sheet ---
   if(!selected.length){
-    board.innerHTML = '<p class="empty">No courses on the sheet. Pick one above to see the week ahead.</p>';
-    return;
+    listView.insertAdjacentHTML('beforeend', '<p class="empty">Nothing on this list yet.</p>');
+  } else {
+    selected.forEach(function(id){
+      const c = course(id);
+      if(!c) return;
+
+      const row = document.createElement('section');
+      row.className = 'course';
+
+      const head = document.createElement('div');
+      head.className = 'chead';
+      const open = document.createElement('button');
+      open.className = 'open';
+      open.type = 'button';
+      open.innerHTML = '<span></span><small></small>';
+      open.querySelector('span').textContent = c.name;
+      open.querySelector('small').textContent = c.area;
+      open.onclick = function(){ openCourse(id); };
+      head.appendChild(open);
+
+      const drop = document.createElement('button');
+      drop.className = 'drop';
+      drop.type = 'button';
+      drop.innerHTML = '&times;';
+      drop.setAttribute('aria-label', 'Remove ' + c.name + ' from this list');
+      drop.onclick = function(){
+        selected = selected.filter(function(x){ return x !== id; });
+        save(K.sel, selected);
+        renderLists();
+      };
+      head.appendChild(drop);
+      row.appendChild(head);
+
+      const entry = cache[id];
+      if(!entry){
+        row.insertAdjacentHTML('beforeend', '<p class="loading">Checking\u2026</p>');
+      } else if(entry.error){
+        row.insertAdjacentHTML('beforeend', '<p class="failed">No data. Tap refresh.</p>');
+      } else {
+        const week = document.createElement('div');
+        week.className = 'week';
+        entry.days.forEach(function(d){
+          const dt = new Date(d.date + 'T00:00:00');
+          const cell = document.createElement('div');
+          cell.className = 'day';
+          cell.title = longDate(d.date) + ': ' + d.reason;
+          cell.innerHTML =
+            '<span class="dow">' + dt.toLocaleDateString(undefined, { weekday:'short' }).slice(0,3) + '</span>' +
+            '<span class="date">' + dt.getDate() + '</span>' +
+            '<span class="lamp ' + d.level + '"></span>' +
+            '<span class="deg">' + d.temp + '\u00b0</span>';
+          week.appendChild(cell);
+        });
+        row.appendChild(week);
+
+        const gstrip = document.createElement('div');
+        gstrip.className = 'ground';
+        gstrip.setAttribute('aria-hidden', 'true');
+        entry.days.forEach(function(d){
+          const g = document.createElement('div');
+          g.className = 'gbar ' + d.g;
+          gstrip.appendChild(g);
+        });
+        row.appendChild(gstrip);
+      }
+      listView.appendChild(row);
+    });
   }
 
-  selected.forEach(function(id){
-    const c = COURSES.find(function(x){ return x.id === id; });
-    if(!c) return;
+  // --- manage ---
+  listView.insertAdjacentHTML('beforeend', '<h2 class="sect">Manage</h2>');
+  const tools = document.createElement('div');
 
-    const row = document.createElement('section');
-    row.className = 'course';
+  const saveBtn = document.createElement('button');
+  saveBtn.className = 'mini';
+  saveBtn.type = 'button';
+  saveBtn.textContent = 'Save as new list';
+  saveBtn.onclick = function(){
+    if(!selected.length) return;
+    const name = prompt('Name this list');
+    if(!name || !name.trim()) return;
+    myLists.push({ name:name.trim(), ids:selected.slice() });
+    active = name.trim();
+    save(K.lists, myLists); save(K.list, active);
+    snippet = null; renderLists();
+  };
+  tools.appendChild(saveBtn);
 
-    const head = document.createElement('div');
-    head.className = 'head';
-    head.innerHTML = '<span class="name"></span><span class="area"></span>';
-    head.querySelector('.name').textContent = c.name;
-    head.querySelector('.area').textContent = c.area;
-
-    const drop = document.createElement('button');
-    drop.className = 'drop';
-    drop.type = 'button';
-    drop.innerHTML = '&times;';
-    drop.setAttribute('aria-label', 'Remove ' + c.name);
-    drop.onclick = function(){
-      selected = selected.filter(function(x){ return x !== id; });
-      save(STORE, selected);
-      buildPicker();
-      render();
+  const mine = myLists.findIndex(function(l){ return l.name === active; });
+  if(mine >= 0){
+    const perm = document.createElement('button');
+    perm.className = 'mini';
+    perm.type = 'button';
+    perm.textContent = 'Make permanent';
+    perm.onclick = function(){
+      const code = "  { name:'" + active.replace(/'/g, "\\'") + "', ids:['" + selected.join("','") + "'] },";
+      if(navigator.clipboard) navigator.clipboard.writeText(code).catch(function(){});
+      snippet = code; renderLists();
     };
-    head.appendChild(drop);
-    row.appendChild(head);
+    tools.appendChild(perm);
 
-    const entry = cache[id];
+    const upd = document.createElement('button');
+    upd.className = 'mini';
+    upd.type = 'button';
+    upd.textContent = 'Update this list';
+    upd.onclick = function(){
+      myLists[mine].ids = selected.slice();
+      save(K.lists, myLists);
+      snippet = null; renderLists();
+    };
+    tools.appendChild(upd);
 
-    if(!entry){
-      row.insertAdjacentHTML('beforeend', '<p class="loading">Checking the forecast\u2026</p>');
-    } else if(entry.error){
-      row.insertAdjacentHTML('beforeend', '<p class="failed">Could not reach the weather service. Tap refresh to try again.</p>');
-    } else {
-      const days = entry.days;
-      const pick = Math.min(openDay[id] || 0, days.length - 1);
+    const del = document.createElement('button');
+    del.className = 'mini';
+    del.type = 'button';
+    del.textContent = 'Delete';
+    del.onclick = function(){
+      myLists.splice(mine, 1);
+      active = PRESETS[0].name;
+      selected = PRESETS[0].ids.slice();
+      save(K.lists, myLists); save(K.list, active); save(K.sel, selected);
+      snippet = null; renderLists(); refresh();
+    };
+    tools.appendChild(del);
+  }
+  listView.appendChild(tools);
 
-      const week = document.createElement('div');
-      week.className = 'week';
-      week.setAttribute('role', 'tablist');
-
-      days.forEach(function(d, i){
-        const dt = new Date(d.date + 'T00:00:00');
-        const b  = document.createElement('button');
-        b.className = 'day';
-        b.type = 'button';
-        b.setAttribute('role', 'tab');
-        b.setAttribute('aria-selected', i === pick ? 'true' : 'false');
-        b.innerHTML =
-          '<span class="dow">' + dt.toLocaleDateString(undefined, { weekday:'short' }).slice(0,3) + '</span>' +
-          '<span class="date">' + dt.getDate() + '</span>' +
-          '<span class="lamp ' + d.level + '"></span>' +
-          '<span class="deg">' + d.temp + '\u00b0</span>';
-        b.onclick = function(){ openDay[id] = i; render(); };
-        week.appendChild(b);
-      });
-      row.appendChild(week);
-
-      const d  = days[pick];
-      const dt = new Date(d.date + 'T00:00:00');
-      const det = document.createElement('div');
-      det.className = 'detail ' + d.level;
-      det.innerHTML =
-        '<b>' + dt.toLocaleDateString(undefined, { weekday:'long', month:'short', day:'numeric' }) + '</b> \u2014 ' +
-        d.reason + '<br><span>' +
-        d.mm.toFixed(1) + 'mm total \u00b7 ' + d.pop + '% chance \u00b7 feels ' + d.feels + '\u00b0 \u00b7 gusts ' + d.gust + ' km/h' +
-        '</span>';
-      row.appendChild(det);
-    }
-
-    board.appendChild(row);
-  });
+  if(snippet){
+    listView.insertAdjacentHTML('beforeend',
+      '<div class="snippet">Copied. Paste this inside the PRESETS block in index.html:<br><br>' +
+      snippet.replace(/</g, '&lt;') + '</div>');
+  }
 }
 
-/* ---------- data flow ---------- */
+/* ==================================================================
+   7. TABS + DATA FLOW
+   ================================================================== */
+
+function showTab(which){
+  const isCourse = which === 'course';
+  document.getElementById('tab-course').setAttribute('aria-selected', String(isCourse));
+  document.getElementById('tab-lists').setAttribute('aria-selected', String(!isCourse));
+  document.getElementById('view-course').hidden = !isCourse;
+  document.getElementById('view-lists').hidden = isCourse;
+  if(!isCourse) renderLists();
+}
+
+document.getElementById('tab-course').onclick = function(){ showTab('course'); };
+document.getElementById('tab-lists').onclick  = function(){ snippet = null; showTab('lists'); };
 
 async function refresh(){
   const btn = document.getElementById('refresh');
@@ -513,41 +918,27 @@ async function refresh(){
   btn.classList.add('spin');
   stamp.textContent = 'Refreshing\u2026';
 
-  await Promise.all(selected.map(async function(id){
-    const c = COURSES.find(function(x){ return x.id === id; });
+  const ids = needed();
+  await Promise.all(ids.map(async function(id){
+    const c = course(id);
     if(!c) return;
-    try {
-      cache[id] = { days: await fetchCourse(c) };
-    } catch(e){
-      if(!cache[id] || cache[id].error) cache[id] = { error:true };
-    }
+    try { cache[id] = await fetchCourse(c); }
+    catch(e){ if(!cache[id] || cache[id].error) cache[id] = { error:true }; }
   }));
 
-  Object.keys(cache).forEach(function(id){
-    if(selected.indexOf(id) < 0) delete cache[id];
-  });
+  Object.keys(cache).forEach(function(id){ if(ids.indexOf(id) < 0) delete cache[id]; });
+  save(K.cache, cache);
 
-  save(CACHE, cache);
-  render();
-  stamp.textContent = 'Mornings 6am\u2013noon \u00b7 updated ' +
+  renderCourse();
+  if(!document.getElementById('view-lists').hidden) renderLists();
+
+  stamp.textContent = 'Updated ' +
     new Date().toLocaleTimeString(undefined, { hour:'numeric', minute:'2-digit' });
 }
 
-picker.onchange = function(){
-  const id = picker.value;
-  if(!id) return;
-  selected.push(id);
-  save(STORE, selected);
-  picker.value = '';
-  buildPicker();
-  render();
-  refresh();
-};
-
 document.getElementById('refresh').onclick = refresh;
 
-buildPicker();
-render();
+renderCourse();
 refresh();
 </script>
 </body>
