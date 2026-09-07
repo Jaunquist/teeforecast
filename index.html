@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tee Sheet</title>
+<meta name="theme-color" content="#0E1D18">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Tee Sheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --turf:      #0E1D18;
+    --raised:    #172C24;
+    --line:      #294338;
+    --ink:       #E9F0EA;
+    --muted:     #86A093;
+    --go:        #3FBF6A;
+    --hold:      #E8A33D;
+    --stop:      #E0523F;
+    --dead:      #3A4F46;
+  }
+
+  *{ box-sizing:border-box; margin:0; padding:0; }
+
+  html{ background:var(--turf); }
+
+  body{
+    background:var(--turf);
+    color:var(--ink);
+    font-family:'Barlow',system-ui,-apple-system,sans-serif;
+    font-size:15px;
+    line-height:1.45;
+    -webkit-font-smoothing:antialiased;
+    padding:0 16px calc(40px + env(safe-area-inset-bottom));
+    max-width:640px;
+    margin:0 auto;
+  }
+
+  /* ---------- masthead ---------- */
+
+  header{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:16px;
+    padding:calc(22px + env(safe-area-inset-top)) 0 16px;
+  }
+
+  h1{
+    font-family:'Barlow Condensed',sans-serif;
+    font-size:34px;
+    font-weight:700;
+    letter-spacing:.01em;
+    line-height:.95;
+  }
+
+  .stamp{
+    color:var(--muted);
+    font-size:12.5px;
+    margin-top:3px;
+  }
+
+  #refresh{
+    flex:0 0 auto;
+    width:44px; height:44px;
+    border-radius:50%;
+    border:1px solid var(--line);
+    background:var(--raised);
+    color:var(--ink);
+    display:grid; place-items:center;
+    cursor:pointer;
+    transition:transform .35s ease, border-color .2s;
+  }
+  #refresh:hover{ border-color:var(--muted); }
+  #refresh:focus-visible{ outline:2px solid var(--go); outline-offset:2px; }
+  #refresh.spin svg{ animation:turn .7s ease-in-out; }
+  @keyframes turn{ to{ transform:rotate(360deg); } }
+  #refresh svg{ width:19px; height:19px; fill:none; stroke:currentColor; stroke-width:1.9; stroke-linecap:round; }
+
+  /* ---------- picker ---------- */
+
+  .picker{ position:relative; margin-bottom:22px; }
+
+  select{
+    -webkit-appearance:none; appearance:none;
+    width:100%;
+    padding:13px 40px 13px 15px;
+    background:transparent;
+    border:1px solid var(--line);
+    border-radius:9px;
+    color:var(--ink);
+    font-family:'Barlow',sans-serif;
+    font-size:15px;
+    cursor:pointer;
+  }
+  select:focus-visible{ outline:2px solid var(--go); outline-offset:1px; }
+  .picker::after{
+    content:'';
+    position:absolute; right:16px; top:50%;
+    width:7px; height:7px;
+    margin-top:-5px;
+    border-right:1.7px solid var(--muted);
+    border-bottom:1.7px solid var(--muted);
+    transform:rotate(45deg);
+    pointer-events:none;
+  }
+  option, optgroup{ background:#172C24; color:#E9F0EA; }
+
+  /* ---------- course rows ---------- */
+
+  .course{
+    border-top:1px solid var(--line);
+    padding:16px 0 18px;
+  }
+
+  .head{
+    display:flex; align-items:baseline; gap:8px;
+    margin-bottom:11px;
+  }
+  .name{
+    font-family:'Barlow Condensed',sans-serif;
+    font-size:21px; font-weight:600;
+    letter-spacing:.01em;
+    line-height:1.1;
+  }
+  .area{ color:var(--muted); font-size:12.5px; flex:1; }
+
+  .drop{
+    flex:0 0 auto;
+    width:26px; height:26px;
+    border:0; border-radius:50%;
+    background:transparent;
+    color:var(--dead);
+    font-size:19px; line-height:1;
+    cursor:pointer;
+  }
+  .drop:hover{ color:var(--stop); }
+  .drop:focus-visible{ outline:2px solid var(--go); outline-offset:1px; }
+
+  .week{
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    gap:5px;
+  }
+
+  .day{
+    border:0;
+    padding:7px 2px 8px;
+    border-radius:7px;
+    background:var(--raised);
+    color:var(--ink);
+    font-family:'Barlow Condensed',sans-serif;
+    text-align:center;
+    cursor:pointer;
+    display:flex; flex-direction:column; align-items:center; gap:5px;
+    transition:box-shadow .15s;
+  }
+  .day:focus-visible{ outline:2px solid var(--ink); outline-offset:1px; }
+  .day[aria-selected="true"]{ box-shadow:inset 0 0 0 1.5px var(--ink); }
+
+  .dow{ font-size:12px; font-weight:600; color:var(--muted); letter-spacing:.04em; }
+  .date{ font-size:11px; color:var(--dead); margin-top:-4px; }
+  .lamp{ width:15px; height:15px; border-radius:50%; }
+  .lamp.go{ background:var(--go); }
+  .lamp.hold{ background:var(--hold); }
+  .lamp.stop{ background:var(--stop); }
+  .lamp.none{ background:var(--dead); }
+  .deg{ font-size:15px; font-weight:600; line-height:1; }
+
+  .detail{
+    margin-top:12px;
+    padding:11px 13px;
+    background:var(--raised);
+    border-left:3px solid var(--dead);
+    border-radius:0 7px 7px 0;
+    font-size:13.5px;
+  }
+  .detail.go{ border-left-color:var(--go); }
+  .detail.hold{ border-left-color:var(--hold); }
+  .detail.stop{ border-left-color:var(--stop); }
+  .detail b{ font-weight:600; }
+  .detail span{ color:var(--muted); }
+
+  .loading, .failed{ color:var(--muted); font-size:13.5px; padding:4px 0; }
+  .failed{ color:var(--hold); }
+
+  /* ---------- footer ---------- */
+
+  .empty{
+    border-top:1px solid var(--line);
+    padding:34px 0;
+    color:var(--muted);
+    font-size:14px;
+  }
+
+  .key{
+    display:flex; flex-wrap:wrap; gap:14px;
+    border-top:1px solid var(--line);
+    margin-top:6px; padding-top:16px;
+    font-size:12.5px; color:var(--muted);
+  }
+  .key i{ display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:6px; }
+
+  .credit{ margin-top:14px; font-size:11.5px; color:var(--dead); line-height:1.6; }
+  .credit a{ color:var(--dead); }
+
+  @media (prefers-reduced-motion:reduce){
+    *{ animation:none !important; transition:none !important; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Tee Sheet</h1>
+    <div class="stamp" id="stamp">Mornings, 6am to noon</div>
+  </div>
+  <button id="refresh" aria-label="Refresh forecast">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M20 11a8 8 0 1 0-.9 4.5"/><path d="M20 5v6h-6"/>
+    </svg>
+  </button>
+</header>
+
+<div class="picker">
+  <select id="add" aria-label="Add a course">
+    <option value="">Add a course</option>
+  </select>
+</div>
+
+<main id="board"></main>
+
+<div class="key">
+  <span><i style="background:#3FBF6A"></i>Good to play</span>
+  <span><i style="background:#E8A33D"></i>Drizzle or heat</span>
+  <span><i style="background:#E0523F"></i>Storms or heavy rain</span>
+</div>
+
+<p class="credit">
+  Forecasts from <a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo</a>,
+  free for non-commercial use. Ratings cover 6am&ndash;12pm local time at each course.
+</p>
+
+<script>
+/* ------------------------------------------------------------------
+   COURSES — coordinates are of the club itself, not the town centre.
+   Add your own: copy a row, set name / area / lat / lon / region.
+------------------------------------------------------------------ */
+const COURSES = [
+  { id:'wackwack',   name:'Wack Wack',            area:'Mandaluyong',      region:'Metro Manila', lat:14.5898, lon:121.0493 },
+  { id:'manilagolf', name:'Manila Golf',          area:'Makati',           region:'Metro Manila', lat:14.5505, lon:121.0391 },
+  { id:'intramuros', name:'Club Intramuros',      area:'Manila',           region:'Metro Manila', lat:14.5929, lon:120.9699 },
+  { id:'villamor',   name:'Villamor',             area:'Pasay',            region:'Metro Manila', lat:14.5250, lon:121.0210 },
+  { id:'navy',       name:'Philippine Navy',      area:'Taguig',           region:'Metro Manila', lat:14.5213, lon:121.0320 },
+  { id:'army',       name:'Philippine Army',      area:'Taguig',           region:'Metro Manila', lat:14.5311, lon:121.0407 },
+  { id:'aguinaldo',  name:'Camp Aguinaldo',       area:'Quezon City',      region:'Metro Manila', lat:14.6055, lon:121.0581 },
+  { id:'veterans',   name:'Veterans Memorial',    area:'Quezon City',      region:'Metro Manila', lat:14.6569, lon:121.0385 },
+
+  { id:'valley',     name:'Valley',               area:'Antipolo',         region:'Rizal',        lat:14.6043, lon:121.1409 },
+  { id:'foresthills',name:'Forest Hills',         area:'Antipolo',         region:'Rizal',        lat:14.6394, lon:121.1973 },
+  { id:'sunvalley',  name:'Sun Valley',           area:'Antipolo',         region:'Rizal',        lat:14.6451, lon:121.1812 },
+  { id:'eastridge',  name:'Eastridge',            area:'Angono',           region:'Rizal',        lat:14.5265, lon:121.1859 },
+
+  { id:'southwoods', name:'Manila Southwoods',    area:'Carmona',          region:'Cavite',       lat:14.3219, lon:121.0447 },
+  { id:'orchard',    name:'The Orchard',          area:'Dasmari\u00f1as',  region:'Cavite',       lat:14.3516, lon:120.9617 },
+  { id:'riviera',    name:'Riviera',              area:'Silang',           region:'Cavite',       lat:14.2350, lon:120.9478 },
+  { id:'southforbes',name:'South Forbes',         area:'Silang',           region:'Cavite',       lat:14.2426, lon:121.0387 },
+  { id:'eagleridge', name:'Eagle Ridge',          area:'General Trias',    region:'Cavite',       lat:14.2520, lon:120.9069 },
+  { id:'sherwood',   name:'Sherwood Hills',       area:'Trece Martires',   region:'Cavite',       lat:14.2589, lon:120.8927 },
+
+  { id:'staelena',   name:'Sta. Elena',           area:'Sta. Rosa',        region:'Laguna',       lat:14.2400, lon:121.0904 },
+  { id:'countryclub',name:'The Country Club',     area:'Sta. Rosa',        region:'Laguna',       lat:14.2293, lon:121.0722 },
+  { id:'canlubang',  name:'Canlubang',            area:'Calamba',          region:'Laguna',       lat:14.2002, lon:121.0439 },
+  { id:'greenfield', name:'Ayala Greenfield',     area:'Calamba',          region:'Laguna',       lat:14.1534, lon:121.1600 },
+  { id:'hallowridge',name:'Hallow Ridge',         area:'San Pedro',        region:'Laguna',       lat:14.3566, lon:121.0283 },
+  { id:'caliraya',   name:'Caliraya Springs',     area:'Cavinti',          region:'Laguna',       lat:14.2869, lon:121.5557 },
+
+  { id:'northwoods', name:'Royal Northwoods',     area:'San Rafael',       region:'North',        lat:14.9927, lon:120.9652 },
+  { id:'pradera',    name:'Pradera Verde',        area:'Lubao',            region:'North',        lat:14.8880, lon:120.4972 },
+  { id:'beverly',    name:'Beverly Place',        area:'Mexico, Pampanga', region:'North',        lat:15.0715, lon:120.6882 },
+  { id:'dheights',   name:"D'Heights",            area:'Angeles',          region:'North',        lat:15.1790, lon:120.4873 }
+];
+
+/* ------------------------------------------------------------------
+   TUNING — the numbers that decide the colours. Edit to taste.
+------------------------------------------------------------------ */
+const RULES = {
+  window:      [6, 11],  // tee window, inclusive hours (6am through 11am)
+  heavyPeak:   4,        // mm in any single hour  -> red
+  heavyTotal:  10,       // mm across the window   -> red
+  gustRed:     45,       // km/h                   -> red
+  wetTotal:    1,        // mm across the window   -> amber
+  popAmber:    60,       // % chance of rain       -> amber
+  gustAmber:   30,       // km/h                   -> amber
+  feelsAmber:  38        // apparent °C            -> amber
+};
+
+const STORE = 'teesheet.courses';
+const CACHE = 'teesheet.cache';
+
+let selected = load(STORE, ['wackwack','southwoods','staelena','eastridge']);
+let cache    = load(CACHE, {});
+let openDay  = {};
+
+function load(key, fallback){
+  try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
+  catch(e){ return fallback; }
+}
+function save(key, value){
+  try { localStorage.setItem(key, JSON.stringify(value)); } catch(e){}
+}
+
+/* ---------- forecast ---------- */
+
+function url(c){
+  return 'https://api.open-meteo.com/v1/forecast'
+    + '?latitude=' + c.lat + '&longitude=' + c.lon
+    + '&hourly=temperature_2m,apparent_temperature,precipitation,precipitation_probability,weather_code,wind_gusts_10m'
+    + '&timezone=auto&forecast_days=7';
+}
+
+async function fetchCourse(c){
+  const res = await fetch(url(c));
+  if(!res.ok) throw new Error('HTTP ' + res.status);
+  const raw = await res.json();
+  const h = raw.hourly;
+  const byDate = {};
+
+  for(let i = 0; i < h.time.length; i++){
+    const stamp = h.time[i];
+    const hour  = parseInt(stamp.slice(11, 13), 10);
+    if(hour < RULES.window[0] || hour > RULES.window[1]) continue;
+    const date = stamp.slice(0, 10);
+    (byDate[date] = byDate[date] || []).push({
+      hour: hour,
+      temp: h.temperature_2m[i],
+      feels:h.apparent_temperature[i],
+      mm:   h.precipitation[i],
+      pop:  h.precipitation_probability[i],
+      code: h.weather_code[i],
+      gust: h.wind_gusts_10m[i]
+    });
+  }
+
+  return Object.keys(byDate).sort().map(function(date){
+    return Object.assign({ date: date }, rate(byDate[date]));
+  });
+}
+
+function rate(hrs){
+  const max   = function(f){ return Math.max.apply(null, hrs.map(f)); };
+  const codes = hrs.map(function(h){ return h.code; });
+  const total = hrs.reduce(function(s,h){ return s + h.mm; }, 0);
+  const peak  = max(function(h){ return h.mm; });
+  const feels = max(function(h){ return h.feels; });
+  const temp  = max(function(h){ return h.temp; });
+  const pop   = max(function(h){ return h.pop; });
+  const gust  = max(function(h){ return h.gust; });
+
+  const stormHour = hrs.find(function(h){ return h.code >= 95; });
+  const wetHour   = hrs.find(function(h){ return h.mm >= 0.2; });
+
+  const base = { temp: Math.round(temp), feels: Math.round(feels), mm: total, pop: pop, gust: Math.round(gust) };
+  const out  = function(level, reason){ return Object.assign({ level: level, reason: reason }, base); };
+
+  // --- red ---
+  if(stormHour)                                   return out('stop', 'Thunderstorms from ' + clock(stormHour.hour));
+  if(codes.some(function(c){ return c===65 || c===67 || c===82; }))
+                                                  return out('stop', 'Heavy rain in the window');
+  if(peak >= RULES.heavyPeak)                     return out('stop', 'Downpour, up to ' + peak.toFixed(1) + 'mm in an hour');
+  if(total >= RULES.heavyTotal)                   return out('stop', 'Sustained rain, ' + total.toFixed(0) + 'mm across the morning');
+  if(gust >= RULES.gustRed)                       return out('stop', 'Gusts to ' + Math.round(gust) + ' km/h');
+
+  // --- amber ---
+  if(codes.some(function(c){ return c>=51 && c<=57; }))
+                                                  return out('hold', 'Drizzle' + (wetHour ? ' from ' + clock(wetHour.hour) : ''));
+  if(total >= RULES.wetTotal)                     return out('hold', 'Showers, ' + total.toFixed(1) + 'mm' + (wetHour ? ' from ' + clock(wetHour.hour) : ''));
+  if(codes.some(function(c){ return (c>=61 && c<=63) || c===80 || c===81; }))
+                                                  return out('hold', 'Passing showers likely');
+  if(feels >= RULES.feelsAmber)                   return out('hold', 'Hot and dry, feels like ' + Math.round(feels) + '\u00b0');
+  if(gust >= RULES.gustAmber)                     return out('hold', 'Breezy, gusts to ' + Math.round(gust) + ' km/h');
+  if(pop >= RULES.popAmber)                       return out('hold', pop + '% chance of rain');
+
+  // --- green ---
+  return out('go', codes.every(function(c){ return c === 0; })
+    ? 'Clear all morning'
+    : 'Dry, ' + Math.round(temp) + '\u00b0 by noon');
+}
+
+function clock(h){
+  if(h === 12) return 'noon';
+  return (h % 12 === 0 ? 12 : h % 12) + (h < 12 ? 'am' : 'pm');
+}
+
+/* ---------- rendering ---------- */
+
+const board  = document.getElementById('board');
+const stamp  = document.getElementById('stamp');
+const picker = document.getElementById('add');
+
+function buildPicker(){
+  picker.innerHTML = '<option value="">Add a course</option>';
+  const regions = [];
+  COURSES.forEach(function(c){ if(regions.indexOf(c.region) < 0) regions.push(c.region); });
+
+  regions.forEach(function(region){
+    const group = document.createElement('optgroup');
+    group.label = region;
+    COURSES.filter(function(c){ return c.region === region && selected.indexOf(c.id) < 0; })
+      .forEach(function(c){
+        const o = document.createElement('option');
+        o.value = c.id;
+        o.textContent = c.name + '  \u00b7  ' + c.area;
+        group.appendChild(o);
+      });
+    if(group.children.length) picker.appendChild(group);
+  });
+}
+
+function render(){
+  board.innerHTML = '';
+
+  if(!selected.length){
+    board.innerHTML = '<p class="empty">No courses on the sheet. Pick one above to see the week ahead.</p>';
+    return;
+  }
+
+  selected.forEach(function(id){
+    const c = COURSES.find(function(x){ return x.id === id; });
+    if(!c) return;
+
+    const row = document.createElement('section');
+    row.className = 'course';
+
+    const head = document.createElement('div');
+    head.className = 'head';
+    head.innerHTML = '<span class="name"></span><span class="area"></span>';
+    head.querySelector('.name').textContent = c.name;
+    head.querySelector('.area').textContent = c.area;
+
+    const drop = document.createElement('button');
+    drop.className = 'drop';
+    drop.type = 'button';
+    drop.innerHTML = '&times;';
+    drop.setAttribute('aria-label', 'Remove ' + c.name);
+    drop.onclick = function(){
+      selected = selected.filter(function(x){ return x !== id; });
+      save(STORE, selected);
+      buildPicker();
+      render();
+    };
+    head.appendChild(drop);
+    row.appendChild(head);
+
+    const entry = cache[id];
+
+    if(!entry){
+      row.insertAdjacentHTML('beforeend', '<p class="loading">Checking the forecast\u2026</p>');
+    } else if(entry.error){
+      row.insertAdjacentHTML('beforeend', '<p class="failed">Could not reach the weather service. Tap refresh to try again.</p>');
+    } else {
+      const days = entry.days;
+      const pick = Math.min(openDay[id] || 0, days.length - 1);
+
+      const week = document.createElement('div');
+      week.className = 'week';
+      week.setAttribute('role', 'tablist');
+
+      days.forEach(function(d, i){
+        const dt = new Date(d.date + 'T00:00:00');
+        const b  = document.createElement('button');
+        b.className = 'day';
+        b.type = 'button';
+        b.setAttribute('role', 'tab');
+        b.setAttribute('aria-selected', i === pick ? 'true' : 'false');
+        b.innerHTML =
+          '<span class="dow">' + dt.toLocaleDateString(undefined, { weekday:'short' }).slice(0,3) + '</span>' +
+          '<span class="date">' + dt.getDate() + '</span>' +
+          '<span class="lamp ' + d.level + '"></span>' +
+          '<span class="deg">' + d.temp + '\u00b0</span>';
+        b.onclick = function(){ openDay[id] = i; render(); };
+        week.appendChild(b);
+      });
+      row.appendChild(week);
+
+      const d  = days[pick];
+      const dt = new Date(d.date + 'T00:00:00');
+      const det = document.createElement('div');
+      det.className = 'detail ' + d.level;
+      det.innerHTML =
+        '<b>' + dt.toLocaleDateString(undefined, { weekday:'long', month:'short', day:'numeric' }) + '</b> \u2014 ' +
+        d.reason + '<br><span>' +
+        d.mm.toFixed(1) + 'mm total \u00b7 ' + d.pop + '% chance \u00b7 feels ' + d.feels + '\u00b0 \u00b7 gusts ' + d.gust + ' km/h' +
+        '</span>';
+      row.appendChild(det);
+    }
+
+    board.appendChild(row);
+  });
+}
+
+/* ---------- data flow ---------- */
+
+async function refresh(){
+  const btn = document.getElementById('refresh');
+  btn.classList.remove('spin');
+  void btn.offsetWidth;
+  btn.classList.add('spin');
+  stamp.textContent = 'Refreshing\u2026';
+
+  await Promise.all(selected.map(async function(id){
+    const c = COURSES.find(function(x){ return x.id === id; });
+    if(!c) return;
+    try {
+      cache[id] = { days: await fetchCourse(c) };
+    } catch(e){
+      if(!cache[id] || cache[id].error) cache[id] = { error:true };
+    }
+  }));
+
+  Object.keys(cache).forEach(function(id){
+    if(selected.indexOf(id) < 0) delete cache[id];
+  });
+
+  save(CACHE, cache);
+  render();
+  stamp.textContent = 'Mornings 6am\u2013noon \u00b7 updated ' +
+    new Date().toLocaleTimeString(undefined, { hour:'numeric', minute:'2-digit' });
+}
+
+picker.onchange = function(){
+  const id = picker.value;
+  if(!id) return;
+  selected.push(id);
+  save(STORE, selected);
+  picker.value = '';
+  buildPicker();
+  render();
+  refresh();
+};
+
+document.getElementById('refresh').onclick = refresh;
+
+buildPicker();
+render();
+refresh();
+</script>
+</body>
+</html>
