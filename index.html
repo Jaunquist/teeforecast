@@ -185,34 +185,57 @@
   .gline span{ color:var(--muted); }
   .gline i{ display:inline-block; width:14px; height:5px; border-radius:3px; margin-right:7px; vertical-align:middle; }
 
-  .hours{
-    display:flex; gap:4px; overflow-x:auto; padding-bottom:6px;
+  .sunline{ font-size:12.5px; color:var(--ink); margin-bottom:11px; }
+  .sunline span{ color:var(--muted); }
+
+  .hwrap{
+    display:flex; overflow-x:auto; padding-bottom:6px;
     scrollbar-width:none; -webkit-overflow-scrolling:touch;
   }
-  .hours::-webkit-scrollbar{ display:none; }
+  .hwrap::-webkit-scrollbar{ display:none; }
+
+  /* frozen row labels — stay put while the hours scroll underneath */
+  .hlabels{
+    position:sticky; left:0; z-index:2; flex:0 0 auto;
+    display:flex; flex-direction:column; gap:3px;
+    background:var(--turf); padding:6px 9px 5px 0; margin-right:3px;
+    border-right:1px solid var(--line);
+    font-family:'Barlow Condensed',sans-serif; font-size:10px; font-weight:600;
+    letter-spacing:.07em; text-transform:uppercase; color:var(--dead);
+  }
+  .hlabels span{ display:flex; align-items:center; justify-content:flex-end; white-space:nowrap; }
+  .hlabels .lc{ text-transform:none; letter-spacing:0; }
+
   .hcell{
     flex:0 0 42px; display:flex; flex-direction:column; align-items:center; gap:3px;
     font-family:'Barlow Condensed',sans-serif; padding:6px 0 5px; border-radius:7px;
   }
   .hcell.now{ background:var(--raised); }
+  .hcell > span{ display:flex; align-items:center; justify-content:center; }
+
+  /* shared row heights keep the labels aligned with every column */
+  .r1{ height:14px; }
+  .r2{ height:18px; }
+  .r3{ height:17px; }
+  .r4{ height:26px; border-bottom:1px solid var(--line); }
+  .r5{ height:13px; }
+  .r6{ height:13px; }
+  .r7{ height:8px; }
+
   .hr{ font-size:11.5px; color:var(--muted); }
-  .wx{ height:17px; display:grid; place-items:center; }
   .wx svg{ width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; }
   .wx.storm{ color:var(--stop); }
   .wx.rain{ color:var(--sodden); }
   .wx.cloud{ color:var(--muted); }
   .wx.sun{ color:var(--hold); }
   .htemp{ font-size:14px; font-weight:600; }
-  .barwrap{
-    width:100%; height:26px; display:flex; align-items:flex-end; justify-content:center;
-    border-bottom:1px solid var(--line);
-  }
+  .hcell > span.barwrap{ width:100%; align-items:flex-end; }
   .bar{ width:10px; border-radius:2px 2px 0 0; background:var(--sodden); }
-  .hmm{ font-size:10.5px; color:var(--muted); height:13px; }
-  .wind{ display:flex; align-items:center; gap:2px; font-size:10.5px; color:var(--muted); height:13px; }
+  .hmm{ font-size:10.5px; color:var(--muted); }
+  .wind{ gap:2px; font-size:10.5px; color:var(--muted); }
   .wind svg{ width:9px; height:9px; fill:none; stroke:currentColor; stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round; }
   .wind.strong{ color:var(--hold); }
-  .htick{ width:26px; height:4px; border-radius:2px; }
+  .htick{ width:32px; height:8px; border-radius:3px; }
 
   .scrollnote{ color:var(--dead); font-size:10.5px; }
 
@@ -560,13 +583,25 @@ function url(c){
     + '?latitude=' + c.lat + '&longitude=' + c.lon
     + '&hourly=temperature_2m,apparent_temperature,precipitation,precipitation_probability,'
     + 'weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m,soil_moisture_3_to_9cm'
+    + '&daily=sunrise,sunset'
     + '&timezone=auto&past_days=3&forecast_days=7';
 }
 
 async function fetchCourse(c){
   const res = await fetch(url(c));
   if(!res.ok) throw new Error('HTTP ' + res.status);
-  const h = (await res.json()).hourly;
+  const j = await res.json();
+  const h = j.hourly;
+  const dl = j.daily || {};
+  const sun = {};
+  if(dl.time){
+    dl.time.forEach(function(dt, i){
+      sun[dt] = {
+        sunrise: dl.sunrise ? dl.sunrise[i] : null,
+        sunset:  dl.sunset  ? dl.sunset[i]  : null
+      };
+    });
+  }
   const soilSeries = h.soil_moisture_3_to_9cm || null;
   const windSeries = h.wind_speed_10m || null;
   const dirSeries  = h.wind_direction_10m || null;
@@ -603,7 +638,8 @@ async function fetchCourse(c){
     const prior  = rows.filter(function(r){ return r.ms < start && r.ms >= start - 72 * 3600 * 1000; });
     const rain72 = prior.reduce(function(s, r){ return s + r.mm; }, 0);
 
-    return Object.assign({ date:date }, rate(tee), ground(rain72, tee[0].soil), { rain72:rain72 });
+    return Object.assign({ date:date }, rate(tee), ground(rain72, tee[0].soil),
+                         { rain72:rain72 }, sun[date] || {});
   }).filter(Boolean);
 
   const hours = {};
@@ -689,6 +725,12 @@ function clock(h){
 function shortClock(h){
   if(h === 12) return '12p';
   return (h % 12 === 0 ? 12 : h % 12) + (h < 12 ? 'a' : 'p');
+}
+function fmtTime(iso){
+  if(!iso) return '';
+  const h = parseInt(iso.slice(11, 13), 10);
+  const m = iso.slice(14, 16);
+  return (h % 12 === 0 ? 12 : h % 12) + ':' + m + (h < 12 ? 'am' : 'pm');
 }
 function dayName(d, idx){
   if(idx === 0) return 'Today';
@@ -888,32 +930,54 @@ function renderCourse(){
                  ' <span>after ' + d.rain72.toFixed(0) + 'mm in the previous 72h</span>';
   detail.appendChild(gl);
 
-  const nowH  = new Date().getHours();
-  const strip = document.createElement('div');
-  strip.className = 'hours';
+  if(d.sunrise || d.sunset){
+    const sl = document.createElement('p');
+    sl.className = 'sunline';
+    sl.innerHTML = '<span>Sunrise</span> ' + fmtTime(d.sunrise) +
+                   ' &nbsp;\u00b7&nbsp; <span>Sunset</span> ' + fmtTime(d.sunset);
+    detail.appendChild(sl);
+  }
+
+  const nowH = new Date().getHours();
+  const wrap = document.createElement('div');
+  wrap.className = 'hwrap';
+
+  const labels = document.createElement('div');
+  labels.className = 'hlabels';
+  labels.setAttribute('aria-hidden', 'true');
+  labels.innerHTML =
+    '<span class="r1">Hour</span>' +
+    '<span class="r2">Sky</span>' +
+    '<span class="r3">Temp</span>' +
+    '<span class="r4">Rain</span>' +
+    '<span class="r5 lc">mm</span>' +
+    '<span class="r6">Wind</span>' +
+    '<span class="r7">Play</span>';
+  wrap.appendChild(labels);
+
   entry.hours[date].forEach(function(r){
     const cell   = document.createElement('div');
     const isNow  = dayIdx === 0 && r.hour === nowH;
     const glyph  = icon(r.code);
-    const barPx  = r.mm > 0 ? Math.max(Math.min(r.mm / RULES.barMax, 1) * 26, 2) : 0;
+    const barPx  = r.mm > 0 ? Math.max(Math.min(r.mm / RULES.barMax, 1) * 25, 2) : 0;
     const strong = r.wind != null && r.wind >= RULES.windStrong;
 
     cell.className = 'hcell' + (isNow ? ' now' : '');
     cell.innerHTML =
-      '<span class="hr">' + shortClock(r.hour) + '</span>' +
-      '<span class="wx ' + glyph.cls + '">' + glyph.svg + '</span>' +
-      '<span class="htemp">' + r.temp + '\u00b0</span>' +
-      '<span class="barwrap"><span class="bar" style="height:' + barPx + 'px"></span></span>' +
-      '<span class="hmm">' + (r.mm >= 0.1 ? r.mm.toFixed(1) : '') + '</span>' +
-      (r.wind == null ? '<span class="wind"></span>'
-        : '<span class="wind' + (strong ? ' strong' : '') + '">' +
+      '<span class="hr r1">' + shortClock(r.hour) + '</span>' +
+      '<span class="wx r2 ' + glyph.cls + '">' + glyph.svg + '</span>' +
+      '<span class="htemp r3">' + r.temp + '\u00b0</span>' +
+      '<span class="barwrap r4"><span class="bar" style="height:' + barPx + 'px"></span></span>' +
+      '<span class="hmm r5">' + (r.mm >= 0.1 ? r.mm.toFixed(1) : '') + '</span>' +
+      (r.wind == null ? '<span class="wind r6"></span>'
+        : '<span class="wind r6' + (strong ? ' strong' : '') + '">' +
           (r.dir == null ? '' : windArrow(r.dir)) + r.wind + '</span>') +
-      '<span class="htick ' + r.level + '"></span>';
+      '<span class="htick r7 ' + r.level + '"></span>';
     cell.title = clock(r.hour) + ' \u00b7 ' + r.temp + '\u00b0 \u00b7 ' + r.mm.toFixed(1) + 'mm \u00b7 ' +
                  r.pop + '%' + (r.wind == null ? '' : ' \u00b7 wind ' + r.wind + ' km/h');
-    strip.appendChild(cell);
+    wrap.appendChild(cell);
   });
-  detail.appendChild(strip);
+  detail.appendChild(wrap);
   detail.insertAdjacentHTML('beforeend',
     '<p class="scrollnote">5am to 7pm \u00b7 scroll sideways \u00b7 bar is rainfall, arrow is wind</p>');
 }
