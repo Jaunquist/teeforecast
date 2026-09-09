@@ -197,7 +197,7 @@
   }
 
   .hwrap{
-    display:flex; gap:4px; overflow-x:auto; padding-bottom:6px;
+    display:flex; gap:3px; overflow-x:auto; padding-bottom:6px;
     scrollbar-width:none; -webkit-overflow-scrolling:touch;
   }
   .hwrap::-webkit-scrollbar{ display:none; }
@@ -206,7 +206,7 @@
   .hlabels{
     position:sticky; left:0; z-index:2; flex:0 0 auto;
     display:flex; flex-direction:column; gap:3px;
-    background:var(--turf); padding:6px 9px 5px 0;
+    background:var(--turf); padding:6px 7px 5px 0;
     border-right:1px solid var(--line);
     font-family:'Barlow Condensed',sans-serif; font-size:12px; font-weight:600;
     letter-spacing:.07em; text-transform:uppercase; color:var(--muted);
@@ -215,7 +215,7 @@
   .hlabels .lc{ text-transform:none; letter-spacing:0; }
 
   .hcell{
-    flex:0 0 42px; display:flex; flex-direction:column; align-items:center; gap:3px;
+    flex:0 0 38px; display:flex; flex-direction:column; align-items:center; gap:3px;
     font-family:'Barlow Condensed',sans-serif; padding:6px 0 5px; border-radius:7px;
   }
   .hcell.now{ background:var(--raised); }
@@ -228,7 +228,7 @@
   .r4{ height:26px; border-bottom:1px solid var(--line); }
   .r5{ height:13px; }
   .r6{ height:13px; }
-  .r7{ height:8px; }
+  .r7{ height:12px; margin-top:6px; }
 
   .hr{ font-size:11.5px; color:var(--muted); }
   .wx svg{ width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; }
@@ -243,7 +243,7 @@
   .wind{ gap:2px; font-size:10.5px; color:var(--muted); }
   .wind svg{ width:9px; height:9px; fill:none; stroke:currentColor; stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round; }
   .wind.strong{ color:var(--hold); }
-  .htick{ width:32px; height:8px; border-radius:3px; }
+  .htick{ width:30px; height:12px; border-radius:4px; }
 
   .scrollnote{ color:var(--dead); font-size:10.5px; }
 
