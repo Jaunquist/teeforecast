@@ -197,7 +197,7 @@
   }
 
   .hwrap{
-    display:flex; overflow-x:auto; padding-bottom:6px;
+    display:flex; gap:4px; overflow-x:auto; padding-bottom:6px;
     scrollbar-width:none; -webkit-overflow-scrolling:touch;
   }
   .hwrap::-webkit-scrollbar{ display:none; }
@@ -206,9 +206,9 @@
   .hlabels{
     position:sticky; left:0; z-index:2; flex:0 0 auto;
     display:flex; flex-direction:column; gap:3px;
-    background:var(--turf); padding:6px 9px 5px 0; margin-right:3px;
+    background:var(--turf); padding:6px 9px 5px 0;
     border-right:1px solid var(--line);
-    font-family:'Barlow Condensed',sans-serif; font-size:10px; font-weight:600;
+    font-family:'Barlow Condensed',sans-serif; font-size:12px; font-weight:600;
     letter-spacing:.07em; text-transform:uppercase; color:var(--muted);
   }
   .hlabels span{ display:flex; align-items:center; justify-content:flex-end; white-space:nowrap; }
@@ -337,13 +337,14 @@
   /* ---------- footer ---------- */
 
   .key{
-    display:flex; flex-wrap:wrap; gap:8px 14px;
+    display:flex; flex-wrap:wrap; gap:3px 14px;
     border-top:1px solid var(--line); margin-top:24px; padding-top:14px;
     font-size:12px; color:var(--muted);
   }
   .key i{ display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:6px; }
   .key i.bar{ width:14px; height:5px; border-radius:3px; }
-  .key b{ width:100%; font-weight:600; color:var(--dead); font-size:11px; margin-top:4px; }
+  .key b{ width:100%; font-weight:600; color:var(--dead); font-size:11px; margin-top:10px; }
+  .key b:first-child{ margin-top:0; }
 
   .credit{ margin-top:10px; font-size:9px; color:var(--dead); line-height:1.35; }
   .credit a{ color:var(--dead); }
@@ -991,6 +992,16 @@ function renderCourse(){
     wrap.appendChild(cell);
   });
   detail.appendChild(wrap);
+
+  // Open the strip at the current hour rather than at 5am.
+  const nowIdx = entry.hours[date].findIndex(function(r){ return r.hour === nowH; });
+  if(dayIdx === 0 && nowIdx > 0){
+    requestAnimationFrame(function(){
+      const first  = wrap.children[1];
+      const target = wrap.children[1 + nowIdx];
+      if(first && target) wrap.scrollLeft = target.offsetLeft - first.offsetLeft;
+    });
+  }
   detail.insertAdjacentHTML('beforeend',
     '<p class="scrollnote">5am to 7pm \u00b7 scroll sideways \u00b7 bar is rainfall, arrow is wind</p>');
 }
