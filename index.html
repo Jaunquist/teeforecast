@@ -185,8 +185,16 @@
   .gline span{ color:var(--muted); }
   .gline i{ display:inline-block; width:14px; height:5px; border-radius:3px; margin-right:7px; vertical-align:middle; }
 
-  .sunline{ font-size:12.5px; color:var(--ink); margin-bottom:11px; }
-  .sunline span{ color:var(--muted); }
+  .sunline{
+    display:flex; align-items:center; gap:5px; flex-wrap:wrap;
+    font-size:12.5px; color:var(--ink); margin-bottom:11px;
+  }
+  .sunline b{ font-weight:400; color:var(--muted); }
+  .sunline .sep{ color:var(--dead); }
+  .sunline svg{
+    width:15px; height:15px; flex:0 0 auto; color:var(--hold);
+    fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round;
+  }
 
   .hwrap{
     display:flex; overflow-x:auto; padding-bottom:6px;
@@ -201,7 +209,7 @@
     background:var(--turf); padding:6px 9px 5px 0; margin-right:3px;
     border-right:1px solid var(--line);
     font-family:'Barlow Condensed',sans-serif; font-size:10px; font-weight:600;
-    letter-spacing:.07em; text-transform:uppercase; color:var(--dead);
+    letter-spacing:.07em; text-transform:uppercase; color:var(--muted);
   }
   .hlabels span{ display:flex; align-items:center; justify-content:flex-end; white-space:nowrap; }
   .hlabels .lc{ text-transform:none; letter-spacing:0; }
@@ -337,7 +345,7 @@
   .key i.bar{ width:14px; height:5px; border-radius:3px; }
   .key b{ width:100%; font-weight:600; color:var(--dead); font-size:11px; margin-top:4px; }
 
-  .credit{ margin-top:12px; font-size:11px; color:var(--dead); line-height:1.6; }
+  .credit{ margin-top:10px; font-size:9px; color:var(--dead); line-height:1.35; }
   .credit a{ color:var(--dead); }
 
   @media (prefers-reduced-motion:reduce){ *{ animation:none !important; transition:none !important; } }
@@ -573,6 +581,10 @@ function windArrow(dir){
   return '<svg viewBox="0 0 24 24" style="transform:rotate(' + ((dir + 180) % 360) + 'deg)">' +
          '<path d="M12 21V4M12 4l-5 5M12 4l5 5"/></svg>';
 }
+
+const HORIZON = '<path d="M3.5 19h17"/><path d="M8 15.5a4 4 0 0 1 8 0"/><path d="M2.8 15.5h1.6M19.6 15.5h1.6M5.6 9.6l1.2 1.2M17.2 10.8l1.2-1.2"/>';
+const SUNRISE = '<svg viewBox="0 0 24 24" aria-hidden="true">' + HORIZON + '<path d="M12 8.5V2.4M12 2.4L9.6 4.8M12 2.4l2.4 2.4"/></svg>';
+const SUNSET  = '<svg viewBox="0 0 24 24" aria-hidden="true">' + HORIZON + '<path d="M12 2.4v6.1M12 8.5L9.6 6.1M12 8.5l2.4-2.4"/></svg>';
 
 /* ==================================================================
    6. FORECAST
@@ -933,8 +945,9 @@ function renderCourse(){
   if(d.sunrise || d.sunset){
     const sl = document.createElement('p');
     sl.className = 'sunline';
-    sl.innerHTML = '<span>Sunrise</span> ' + fmtTime(d.sunrise) +
-                   ' &nbsp;\u00b7&nbsp; <span>Sunset</span> ' + fmtTime(d.sunset);
+    sl.innerHTML = SUNRISE + '<b>Sunrise</b> ' + fmtTime(d.sunrise) +
+                   '<span class="sep">\u00b7</span>' +
+                   SUNSET + '<b>Sunset</b> ' + fmtTime(d.sunset);
     detail.appendChild(sl);
   }
 
