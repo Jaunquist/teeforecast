@@ -228,8 +228,14 @@
   .r3{ height:17px; }
   .r4{ height:26px; border-bottom:1px solid var(--line); }
   .r5{ height:14px; }
-  .r6{ height:14px; }
+  .r6{ height:22px; }
   .r7{ height:12px; margin-top:6px; }
+
+  .hlabels .r6{ flex-direction:column; align-items:flex-end; justify-content:center; gap:0; }
+  .hlabels .unit{
+    font-size:9.5px; font-weight:500; text-transform:none; letter-spacing:0;
+    color:var(--dead); line-height:1.1;
+  }
 
   .hr{ font-size:12.5px; color:var(--muted); }
   .wx svg{ width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; }
@@ -245,7 +251,8 @@
   .hmm.soaking{ color:var(--stop); font-weight:600; }
   .wind{ gap:2px; font-size:11.5px; color:var(--muted); }
   .wind svg{ width:9px; height:9px; fill:none; stroke:currentColor; stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round; }
-  .wind.strong{ color:var(--hold); }
+  .wind.brisk{ color:var(--hold); }
+  .wind.gale{ color:var(--stop); font-weight:600; }
   .htick{ width:30px; height:12px; border-radius:4px; }
 
   .scrollnote{ color:var(--dead); font-size:10.5px; }
@@ -489,7 +496,8 @@ const RULES = {
 
   barMax:     6,         // mm that fills the rain bar
   mmAmber:    1,         // mm in an hour that turns the figure amber (red at heavyPeak)
-  windStrong: 25         // km/h that highlights the wind arrow
+  windAmber:  16,        // km/h sustained -> amber, ball flight starts to move
+  windRed:    30         // km/h sustained -> red, club selection guesswork
 };
 
 const WORD = { go:'Good', hold:'Caution', stop:'Avoid' };
@@ -970,7 +978,7 @@ function renderCourse(){
     '<span class="r3">Temp</span>' +
     '<span class="r4">Rain</span>' +
     '<span class="r5 lc">mm</span>' +
-    '<span class="r6">Wind</span>' +
+    '<span class="r6">Wind<em class="unit">km/h</em></span>' +
     '<span class="r7">Play</span>';
   wrap.appendChild(labels);
 
@@ -979,7 +987,8 @@ function renderCourse(){
     const isNow  = dayIdx === 0 && r.hour === nowH;
     const glyph  = icon(r.code);
     const barPx  = r.mm > 0 ? Math.max(Math.min(r.mm / RULES.barMax, 1) * 25, 2) : 0;
-    const strong = r.wind != null && r.wind >= RULES.windStrong;
+    const gusty  = r.wind == null ? ''
+                 : (r.wind >= RULES.windRed ? ' gale' : (r.wind >= RULES.windAmber ? ' brisk' : ''));
 
     cell.className = 'hcell' + (isNow ? ' now' : '');
     cell.innerHTML =
@@ -990,7 +999,7 @@ function renderCourse(){
       '<span class="hmm r5' + (r.mm >= RULES.heavyPeak ? ' soaking' : (r.mm >= RULES.mmAmber ? ' wet' : '')) + '">' +
       (r.mm >= 0.1 ? r.mm.toFixed(1) : '') + '</span>' +
       (r.wind == null ? '<span class="wind r6"></span>'
-        : '<span class="wind r6' + (strong ? ' strong' : '') + '">' +
+        : '<span class="wind r6' + gusty + '">' +
           (r.dir == null ? '' : windArrow(r.dir)) + r.wind + '</span>') +
       '<span class="htick r7 ' + r.level + '"></span>';
     cell.title = clock(r.hour) + ' \u00b7 ' + r.temp + '\u00b0 \u00b7 ' + r.mm.toFixed(1) + 'mm \u00b7 ' +
