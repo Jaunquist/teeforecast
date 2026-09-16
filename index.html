@@ -215,6 +215,28 @@
   .hlabels span{ display:flex; align-items:center; justify-content:flex-end; white-space:nowrap; }
   .hlabels .lc{ text-transform:none; letter-spacing:0; }
 
+  .tee{ display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+  .tee b{
+    flex:0 0 auto; min-width:74px;
+    font-family:'Barlow Condensed',sans-serif; font-size:16px; font-weight:600;
+  }
+  .tee b.unset{ color:var(--muted); font-weight:500; }
+  .tee input[type=range]{
+    flex:1; min-width:0; height:24px; accent-color:var(--go);
+    background:transparent; cursor:pointer;
+  }
+  .tee input[type=range]:focus-visible{ outline:2px solid var(--go); outline-offset:2px; }
+  .teeclear{
+    flex:0 0 auto; border:1px solid var(--line); border-radius:6px; background:transparent;
+    color:var(--muted); font-family:'Barlow',sans-serif; font-size:11.5px;
+    padding:4px 9px; cursor:pointer;
+  }
+  .teeclear:hover{ color:var(--ink); border-color:var(--muted); }
+  .teeclear:focus-visible{ outline:2px solid var(--go); outline-offset:1px; }
+
+  .hcell.inplay{ background:var(--raised); }
+  .hcell.out{ opacity:.38; }
+
   .hcell{
     flex:0 0 40px; display:flex; flex-direction:column; align-items:center; gap:3px;
     font-family:'Barlow Condensed',sans-serif; padding:6px 0 5px; border-radius:7px;
@@ -427,7 +449,7 @@ const COURSES = [
   { id:'aguinaldo',  name:'Camp Aguinaldo',    area:'Quezon City',      region:'Metro Manila', lat:14.6055, lon:121.0581 },
   { id:'veterans',   name:'Veterans Memorial', area:'Quezon City',      region:'Metro Manila', lat:14.6569, lon:121.0385 },
 
-  { id:'valley',      name:'Valley',            area:'Antipolo',        region:'Rizal',  lat:14.6043, lon:121.1409 },
+  { id:'valley',      name:'Valley Golf',       area:'Antipolo',        region:'Rizal',  lat:14.6043, lon:121.1409 },
   { id:'foresthills', name:'Forest Hills',      area:'Antipolo',        region:'Rizal',  lat:14.6394, lon:121.1973 },
   { id:'sunvalley',   name:'Sun Valley',        area:'Antipolo',        region:'Rizal',  lat:14.6451, lon:121.1812 },
   { id:'eastridge',   name:'Eastridge',         area:'Angono',          region:'Rizal',  lat:14.5265, lon:121.1859 },
@@ -457,7 +479,12 @@ const COURSES = [
   { id:'northwoods',  name:'Royal Northwoods',  area:'San Rafael',       region:'North', lat:14.9927, lon:120.9652 },
   { id:'pradera',     name:'Pradera Verde',     area:'Lubao',            region:'North', lat:14.8880, lon:120.4972 },
   { id:'beverly',     name:'Beverly Place',     area:'Mexico, Pampanga', region:'North', lat:15.0715, lon:120.6882 },
-  { id:'dheights',    name:"D'Heights",         area:'Angeles',          region:'North', lat:15.1790, lon:120.4873 }
+  { id:'dheights',    name:"D'Heights",         area:'Angeles',          region:'North', lat:15.1790, lon:120.4873 },
+
+  { id:'luisita',     name:'Luisita',           area:'Tarlac City',      region:'Tarlac', lat:15.4324, lon:120.6195 },
+  { id:'campaquino',  name:'Camp Aquino',       area:'Tarlac City',      region:'Tarlac', lat:15.4398, lon:120.5931 },
+  { id:'newasia',     name:'New Asia',          area:'Capas',            region:'Tarlac', lat:15.3698, lon:120.4608 },
+  { id:'vista',       name:'The Vista',         area:'Capas',            region:'Tarlac', lat:15.2939, lon:120.4902 }
 ];
 
 /* ==================================================================
@@ -497,7 +524,12 @@ const RULES = {
   barMax:     6,         // mm that fills the rain bar
   mmAmber:    1,         // mm in an hour that turns the figure amber (red at heavyPeak)
   windAmber:  16,        // km/h sustained -> amber, ball flight starts to move
-  windRed:    30         // km/h sustained -> red, club selection guesswork
+  windRed:    30,        // km/h sustained -> red, club selection guesswork
+
+  teeMin:     10,        // slider floor, in half-hours past midnight (10 = 5:00am)
+  teeMax:     28,        // slider ceiling (28 = 2:00pm)
+  teeDefault: 12,        // where the slider sits before you move it (12 = 6:00am)
+  roundHours: 5          // hours highlighted from the tee time
 };
 
 const WORD = { go:'Good', hold:'Caution', stop:'Avoid' };
@@ -505,7 +537,7 @@ const WORD = { go:'Good', hold:'Caution', stop:'Avoid' };
 const K = {
   sel:'teesheet.courses', cache:'teesheet.cache', notes:'teesheet.notes',
   lists:'teesheet.lists', current:'teesheet.current', list:'teesheet.activelist',
-  theme:'teesheet.theme'
+  theme:'teesheet.theme', tee:'teesheet.tee'
 };
 
 let selected = load(K.sel, PRESETS[0].ids.slice());
@@ -514,6 +546,7 @@ let notes    = load(K.notes, {});
 let myLists  = load(K.lists, []);
 let current  = load(K.current, 'wackwack');
 let active   = load(K.list, PRESETS[0].name);
+let teeVal   = load(K.tee, null);   // half-hours past midnight, or null for "use now"
 let dayIdx   = 0;
 let comboOn  = false;
 let query    = '';
@@ -751,6 +784,11 @@ function shortClock(h){
   if(h === 12) return '12p';
   return (h % 12 === 0 ? 12 : h % 12) + (h < 12 ? 'a' : 'p');
 }
+function halfClock(v){
+  const h = Math.floor(v / 2);
+  const m = (v % 2) ? '30' : '00';
+  return (h % 12 === 0 ? 12 : h % 12) + ':' + m + (h < 12 ? 'am' : 'pm');
+}
 function fmtTime(iso){
   if(!iso) return '';
   const h = parseInt(iso.slice(11, 13), 10);
@@ -966,6 +1004,30 @@ function renderCourse(){
   }
 
   const nowH = new Date().getHours();
+
+  // --- tee time slider ---
+  const tee = document.createElement('div');
+  tee.className = 'tee';
+
+  const teeLabel = document.createElement('b');
+  const slider = document.createElement('input');
+  slider.type = 'range';
+  slider.min = RULES.teeMin;
+  slider.max = RULES.teeMax;
+  slider.step = 1;
+  slider.value = (teeVal == null ? RULES.teeDefault : teeVal);
+  slider.setAttribute('aria-label', 'Tee time');
+
+  const teeClear = document.createElement('button');
+  teeClear.type = 'button';
+  teeClear.className = 'teeclear';
+  teeClear.textContent = 'Now';
+
+  tee.appendChild(teeLabel);
+  tee.appendChild(slider);
+  tee.appendChild(teeClear);
+  detail.appendChild(tee);
+
   const wrap = document.createElement('div');
   wrap.className = 'hwrap';
 
@@ -982,15 +1044,16 @@ function renderCourse(){
     '<span class="r7">Play</span>';
   wrap.appendChild(labels);
 
+  const cells = [];
+
   entry.hours[date].forEach(function(r){
     const cell   = document.createElement('div');
-    const isNow  = dayIdx === 0 && r.hour === nowH;
     const glyph  = icon(r.code);
     const barPx  = r.mm > 0 ? Math.max(Math.min(r.mm / RULES.barMax, 1) * 25, 2) : 0;
     const gusty  = r.wind == null ? ''
                  : (r.wind >= RULES.windRed ? ' gale' : (r.wind >= RULES.windAmber ? ' brisk' : ''));
 
-    cell.className = 'hcell' + (isNow ? ' now' : '');
+    cell.className = 'hcell';
     cell.innerHTML =
       '<span class="hr r1">' + shortClock(r.hour) + '</span>' +
       '<span class="wx r2 ' + glyph.cls + '">' + glyph.svg + '</span>' +
@@ -1005,15 +1068,48 @@ function renderCourse(){
     cell.title = clock(r.hour) + ' \u00b7 ' + r.temp + '\u00b0 \u00b7 ' + r.mm.toFixed(1) + 'mm \u00b7 ' +
                  r.pop + '%' + (r.wind == null ? '' : ' \u00b7 wind ' + r.wind + ' km/h');
     wrap.appendChild(cell);
+    cells.push({ el:cell, hour:r.hour });
   });
   detail.appendChild(wrap);
 
-  // Open the strip at the current hour rather than at 5am.
-  const nowIdx = entry.hours[date].findIndex(function(r){ return r.hour === nowH; });
-  if(dayIdx === 0 && nowIdx > 0){
+  // Highlight the round window; repaint in place so dragging stays smooth.
+  function paintWindow(){
+    const set   = teeVal != null;
+    const start = set ? Math.floor(teeVal / 2) : null;
+    teeLabel.textContent = set ? halfClock(teeVal) : 'Tee time';
+    teeLabel.className = set ? '' : 'unset';
+
+    cells.forEach(function(c){
+      c.el.classList.remove('inplay', 'out', 'now');
+      if(set){
+        if(c.hour >= start && c.hour < start + RULES.roundHours) c.el.classList.add('inplay');
+        else c.el.classList.add('out');
+      } else if(dayIdx === 0 && c.hour === nowH){
+        c.el.classList.add('now');
+      }
+    });
+  }
+
+  slider.oninput = function(){
+    teeVal = parseInt(slider.value, 10);
+    save(K.tee, teeVal);
+    paintWindow();
+  };
+  teeClear.onclick = function(){
+    teeVal = null;
+    save(K.tee, null);
+    slider.value = RULES.teeDefault;
+    paintWindow();
+  };
+  paintWindow();
+
+  // Open the strip at the tee time, or at the current hour when none is set.
+  const anchor = teeVal != null ? Math.floor(teeVal / 2) : (dayIdx === 0 ? nowH : -1);
+  const aIdx = entry.hours[date].findIndex(function(r){ return r.hour === anchor; });
+  if(aIdx > 0){
     requestAnimationFrame(function(){
       const first  = wrap.children[1];
-      const target = wrap.children[1 + nowIdx];
+      const target = wrap.children[1 + aIdx];
       if(first && target) wrap.scrollLeft = target.offsetLeft - first.offsetLeft;
     });
   }
