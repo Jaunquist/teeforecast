@@ -8,7 +8,7 @@
    error state for that. */
 
 const CACHE = 'tee-forecast-v1';
-const SHELL = ['./', './index.html', './manifest.json'];
+const SHELL = ['./', './index.html', './manifest.webmanifest'];
 
 self.addEventListener('install', function(e){
   e.waitUntil(
