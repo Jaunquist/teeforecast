@@ -1,13 +1,13 @@
 {
   "name": "Tee Forecast",
   "short_name": "Tee Forecast",
-  "description": "Morning weather and ground conditions for Philippine golf courses.",
-  "start_url": "./",
-  "scope": "./",
+  "description": "Morning weather and ground conditions for Philippine golf courses",
+  "version": "1.0.0",
+  "theme_color": "#0E1D18",
+  "background_color": "#0E1D18",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#0E1D18",
-  "theme_color": "#0E1D18",
+  "start_url": "./",
   "icons": [
     {
       "src": "icon-192.png",
