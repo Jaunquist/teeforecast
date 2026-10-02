@@ -99,6 +99,25 @@
   .tab:focus-visible{ outline:2px solid var(--go); outline-offset:2px; }
   .view[hidden]{ display:none; }
 
+  .installbar{
+    display:flex; align-items:center; gap:10px;
+    background:var(--raised); border:1px solid var(--line); border-radius:9px;
+    padding:8px 8px 8px 14px; margin-bottom:12px; font-size:13.5px;
+  }
+  .installbar[hidden]{ display:none; }
+  .installbar span{ flex:1; }
+  #installbtn{
+    border:0; border-radius:7px; background:var(--go); color:var(--onband);
+    font-family:'Barlow',sans-serif; font-size:13px; font-weight:600;
+    padding:7px 14px; cursor:pointer;
+  }
+  #installbtn:focus-visible{ outline:2px solid var(--ink); outline-offset:2px; }
+  #installx{
+    border:0; background:transparent; color:var(--dead);
+    font-size:19px; line-height:1; width:28px; height:28px; cursor:pointer;
+  }
+  #installx:hover{ color:var(--ink); }
+
   /* ---------- combobox ---------- */
 
   .combo{ position:relative; margin-bottom:12px; }
@@ -399,6 +418,12 @@
   </button>
 </header>
 
+<div class="installbar" id="installbar" hidden>
+  <span>Install Tee Forecast as an app</span>
+  <button id="installbtn" type="button">Install</button>
+  <button id="installx" type="button" aria-label="Dismiss">&times;</button>
+</div>
+
 <div class="tabs" role="tablist">
   <button class="tab" id="tab-course" role="tab" aria-selected="true" aria-controls="view-course">Course</button>
   <button class="tab" id="tab-lists"  role="tab" aria-selected="false" aria-controls="view-lists">Lists</button>
@@ -539,7 +564,7 @@ const WORD = { go:'Good', hold:'Caution', stop:'Avoid' };
 const K = {
   sel:'teesheet.courses', cache:'teesheet.cache', notes:'teesheet.notes',
   lists:'teesheet.lists', current:'teesheet.current', list:'teesheet.activelist',
-  theme:'teesheet.theme', tee:'teesheet.tee'
+  theme:'teesheet.theme', tee:'teesheet.tee', installx:'teesheet.installx'
 };
 
 let selected = load(K.sel, PRESETS[0].ids.slice());
@@ -1366,6 +1391,46 @@ async function refresh(){
 }
 
 document.getElementById('refresh').onclick = refresh;
+
+/* ==================================================================
+   INSTALL — Chrome's ⋮ menu on Samsung kept producing a badged shortcut.
+   Calling the install API from a button goes straight to the real
+   install flow, so offer that instead. The bar only appears when Chrome
+   says the app is installable, and never inside the installed app.
+   ================================================================== */
+let deferredInstall = null;
+const installBar = document.getElementById('installbar');
+const runningInstalled = window.matchMedia('(display-mode: standalone)').matches ||
+                         window.navigator.standalone === true;
+const DISMISS_DAYS = 14;
+
+function dismissedRecently(){
+  const t = load(K.installx, 0);
+  return t && (Date.now() - t) < DISMISS_DAYS * 86400000;
+}
+
+window.addEventListener('beforeinstallprompt', function(e){
+  e.preventDefault();               // hold Chrome's own mini-infobar back
+  deferredInstall = e;
+  if(!runningInstalled && !dismissedRecently()) installBar.hidden = false;
+});
+
+document.getElementById('installbtn').onclick = function(){
+  if(!deferredInstall) return;
+  installBar.hidden = true;
+  deferredInstall.prompt();
+  deferredInstall.userChoice.catch(function(){}).then(function(){ deferredInstall = null; });
+};
+
+document.getElementById('installx').onclick = function(){
+  installBar.hidden = true;
+  save(K.installx, Date.now());
+};
+
+window.addEventListener('appinstalled', function(){
+  installBar.hidden = true;
+  deferredInstall = null;
+});
 
 closeCombo();
 renderCourse();
