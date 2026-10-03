@@ -75,7 +75,7 @@
     font-family:'Barlow',system-ui,-apple-system,sans-serif;
     font-size:15px; line-height:1.45;
     -webkit-font-smoothing:antialiased;
-    padding:0 16px calc(32px + env(safe-area-inset-bottom));
+    padding:0 16px calc(8px + env(safe-area-inset-bottom));
     max-width:640px; margin:0 auto;
   }
 
@@ -198,6 +198,10 @@
     color:var(--muted); font-family:'Barlow Condensed',sans-serif; font-size:14px; font-weight:600;
     letter-spacing:.03em; padding:8px 2px 7px; cursor:pointer;
     display:flex; flex-direction:column; align-items:center; gap:4px;
+  }
+  .dtab{ min-width:0; }
+  .dtab > span:first-child{
+    max-width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   }
   .dtab[aria-selected="true"]{ color:var(--ink); border-color:var(--muted); background:var(--raised); }
   .dtab:focus-visible{ outline:2px solid var(--go); outline-offset:1px; }
@@ -416,7 +420,7 @@
 
   .key{
     display:flex; flex-wrap:wrap; gap:3px 14px;
-    border-top:1px solid var(--line); margin-top:24px; padding-top:14px;
+    border-top:1px solid var(--line); margin-top:16px; padding-top:10px;
     font-size:12px; color:var(--muted);
   }
   .key i{ display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:6px; }
@@ -425,7 +429,7 @@
   .key b{ width:100%; font-weight:600; color:var(--dead); font-size:11px; margin-top:10px; }
   .key b:first-child{ margin-top:0; }
 
-  .credit{ margin-top:10px; font-size:9px; color:var(--dead); line-height:1.35; }
+  .credit{ margin-top:6px; font-size:9px; color:var(--dead); line-height:1.35; }
   .credit a{ color:var(--dead); }
 
   @media (prefers-reduced-motion:reduce){ *{ animation:none !important; transition:none !important; } }
