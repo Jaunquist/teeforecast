@@ -27,12 +27,21 @@
     --ink:    #E9F0EA;
     --muted:  #86A093;
     --dead:   #3A4F46;
-    --go:     #3FBF6A;
-    --hold:   #E8A33D;
-    --stop:   #E0523F;
-    --firm:   #C9B486;
-    --soft:   #5A9C9E;
-    --sodden: #3E6BAA;
+    /* Status colours are colour-blind safe (Okabe-Ito based): they differ
+       in lightness as well as hue, so they still separate when red and
+       green can't be told apart. Never use them as the only cue. */
+    --go:     #4FA8E8;
+    --hold:   #F2DC4A;
+    --hold-2: #A8952A;
+    --stop:   #D2601A;
+    --on-go:  #0E1D18;
+    --on-hold:#0E1D18;
+    --on-stop:#0E1D18;
+    /* Ground is one hue, light to dark, so order reads without colour. */
+    --firm:   #EAD7A4;
+    --soft:   #C29A55;
+    --sodden: #8A6332;
+    --rain:   #94A3B3;
     --onband: #0E1D18;
     --shadow: rgba(0,0,0,.45);
   }
@@ -43,12 +52,17 @@
     --ink:    #16241E;
     --muted:  #5C7268;
     --dead:   #9AACA1;
-    --go:     #2E9E54;
-    --hold:   #BF7A12;
-    --stop:   #C43C2A;
-    --firm:   #9C7F3C;
-    --soft:   #37787A;
-    --sodden: #2C5490;
+    --go:     #0B6FB0;
+    --hold:   #D4AA1C;
+    --hold-2: #9C7C0E;
+    --stop:   #8E3307;
+    --on-go:  #FFFFFF;
+    --on-hold:#16241E;
+    --on-stop:#FFFFFF;
+    --firm:   #C8A962;
+    --soft:   #A87A36;
+    --sodden: #6B4A1F;
+    --rain:   #5D6B7A;
     --onband: #FFFFFF;
     --shadow: rgba(20,40,30,.16);
   }
@@ -187,15 +201,23 @@
   }
   .dtab[aria-selected="true"]{ color:var(--ink); border-color:var(--muted); background:var(--raised); }
   .dtab:focus-visible{ outline:2px solid var(--go); outline-offset:1px; }
-  .dtab i{ width:9px; height:9px; border-radius:50%; }
+  .mark{ display:inline-grid; place-items:center; width:17px; height:17px; border-radius:50%; flex:0 0 auto; }
+  .mark svg{ width:11px; height:11px; fill:none; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
+  .mark.go{ background:var(--go); }   .mark.go svg{ stroke:var(--on-go); }
+  .mark.hold{ background:var(--hold); } .mark.hold svg{ stroke:var(--on-hold); }
+  .mark.stop{ background:var(--stop); } .mark.stop svg{ stroke:var(--on-stop); }
+  .mark.none{ background:var(--dead); }
 
   .band{
     display:flex; align-items:center; gap:13px;
     border-radius:11px; padding:13px 16px; margin-bottom:9px; color:var(--onband);
   }
-  .band.go{ background:var(--go); }
-  .band.hold{ background:var(--hold); }
-  .band.stop{ background:var(--stop); }
+  .band.go{ background:var(--go); color:var(--on-go); }
+  .band.hold{ background:var(--hold); color:var(--on-hold); }
+  .band.stop{ background:var(--stop); color:var(--on-stop); }
+  .bandmark{ width:30px; height:30px; flex:0 0 auto; }
+  .bandmark svg{ width:30px; height:30px; fill:none; stroke:currentColor; stroke-width:1.5;
+                 stroke-linecap:round; stroke-linejoin:round; }
   .bandword{
     font-family:'Barlow Condensed',sans-serif; font-size:27px; font-weight:700;
     line-height:.9; flex:0 0 auto;
@@ -283,12 +305,12 @@
   .hr{ font-size:12.5px; color:var(--muted); }
   .wx svg{ width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; }
   .wx.storm{ color:var(--stop); }
-  .wx.rain{ color:var(--sodden); }
+  .wx.rain{ color:var(--rain); }
   .wx.cloud{ color:var(--muted); }
   .wx.sun{ color:var(--hold); }
   .htemp{ font-size:14px; font-weight:600; }
   .hcell > span.barwrap{ width:100%; align-items:flex-end; }
-  .bar{ width:10px; border-radius:2px 2px 0 0; background:var(--sodden); }
+  .bar{ width:10px; border-radius:2px 2px 0 0; background:var(--rain); }
   .hmm{ font-size:11.5px; color:var(--muted); }
   .hmm.wet{ color:var(--hold); }
   .hmm.soaking{ color:var(--stop); font-weight:600; }
@@ -297,6 +319,8 @@
   .wind.brisk{ color:var(--hold); }
   .wind.gale{ color:var(--stop); font-weight:600; }
   .htick{ width:30px; height:12px; border-radius:4px; }
+  .htick.hold{ background:repeating-linear-gradient(135deg, var(--hold) 0 3px, var(--hold-2) 3px 6px); }
+  .htick svg{ width:8px; height:8px; fill:none; stroke:var(--on-stop); stroke-width:2.4; stroke-linecap:round; }
 
   .scrollnote{ color:var(--dead); font-size:10.5px; }
 
@@ -359,6 +383,7 @@
   .dow{ font-size:12px; font-weight:600; color:var(--muted); }
   .date{ font-size:11px; color:var(--dead); margin-top:-4px; }
   .lamp{ width:15px; height:15px; border-radius:50%; }
+  .day .mark{ width:18px; height:18px; }
   .deg{ font-size:15px; font-weight:600; line-height:1; }
   .ground{ display:grid; grid-template-columns:repeat(7,1fr); gap:5px; margin-top:4px; }
   .gbar{ height:6px; border-radius:3px; }
@@ -395,6 +420,7 @@
     font-size:12px; color:var(--muted);
   }
   .key i{ display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:6px; }
+  .kitem{ display:inline-flex; align-items:center; gap:6px; }
   .key i.bar{ width:14px; height:5px; border-radius:3px; }
   .key b{ width:100%; font-weight:600; color:var(--dead); font-size:11px; margin-top:10px; }
   .key b:first-child{ margin-top:0; }
@@ -446,9 +472,9 @@
 
 <div class="key">
   <b>Play</b>
-  <span><i class="go"></i>Good</span>
-  <span><i class="hold"></i>Caution</span>
-  <span><i class="stop"></i>Avoid</span>
+  <span class="kitem"><span class="mark go" data-mark="go"></span>Good</span>
+  <span class="kitem"><span class="mark hold" data-mark="hold"></span>Caution</span>
+  <span class="kitem"><span class="mark stop" data-mark="stop"></span>Avoid</span>
   <b>Ground</b>
   <span><i class="bar firm"></i>Firm</span>
   <span><i class="bar soft"></i>Soft</span>
@@ -560,6 +586,18 @@ const RULES = {
 };
 
 const WORD = { go:'Good', hold:'Caution', stop:'Avoid' };
+
+// Symbol paired with each status, so meaning never rests on colour alone.
+const GLYPH = {
+  go:   '<path d="M2.6 6.2l2.3 2.3 4.6-4.9"/>',
+  hold: '<path d="M6 2.5v4.4M6 9.3v.1"/>',
+  stop: '<path d="M3.3 3.3l5.4 5.4M8.7 3.3L3.3 8.7"/>',
+  none: ''
+};
+function mark(level){
+  return '<span class="mark ' + level + '"><svg viewBox="0 0 12 12" aria-hidden="true">' +
+         (GLYPH[level] || '') + '</svg></span>';
+}
 
 const K = {
   sel:'teesheet.courses', cache:'teesheet.cache', notes:'teesheet.notes',
@@ -994,7 +1032,7 @@ function renderCourse(){
     b.type = 'button';
     b.setAttribute('role', 'tab');
     b.setAttribute('aria-selected', String(i === dayIdx));
-    b.innerHTML = '<span></span><i class="' + (d ? d.level : 'none') + '"></i>';
+    b.innerHTML = '<span></span>' + mark(d ? d.level : 'none');
     b.querySelector('span').textContent = dayName(date, i) + ' \u00b7 ' + shortDate(date);
     b.onclick = function(){ dayIdx = i; renderCourse(); };
     tabs.appendChild(b);
@@ -1009,7 +1047,9 @@ function renderCourse(){
   const band = document.createElement('div');
   band.className = 'band ' + d.level;
   band.setAttribute('role', 'status');
-  band.innerHTML = '<span class="bandword"></span><span class="bandtext"></span>';
+  band.innerHTML = '<span class="bandmark"><svg viewBox="0 0 12 12" aria-hidden="true">' +
+                   GLYPH[d.level] + '</svg></span>' +
+                   '<span class="bandword"></span><span class="bandtext"></span>';
   band.querySelector('.bandword').textContent = WORD[d.level];
   band.querySelector('.bandtext').textContent = d.reason + ' \u00b7 ' + d.temp + '\u00b0, feels ' + d.feels + '\u00b0';
   detail.appendChild(band);
@@ -1091,7 +1131,9 @@ function renderCourse(){
       (r.wind == null ? '<span class="wind r6"></span>'
         : '<span class="wind r6' + gusty + '">' +
           (r.dir == null ? '' : windArrow(r.dir)) + r.wind + '</span>') +
-      '<span class="htick r7 ' + r.level + '"></span>';
+      '<span class="htick r7 ' + r.level + '">' +
+      (r.level === 'stop' ? '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 3l6 6M9 3L3 9"/></svg>' : '') +
+      '</span>';
     cell.title = clock(r.hour) + ' \u00b7 ' + r.temp + '\u00b0 \u00b7 ' + r.mm.toFixed(1) + 'mm \u00b7 ' +
                  r.pop + '%' + (r.wind == null ? '' : ' \u00b7 wind ' + r.wind + ' km/h');
     wrap.appendChild(cell);
@@ -1265,7 +1307,7 @@ function renderLists(){
           cell.innerHTML =
             '<span class="dow">' + dt.toLocaleDateString(undefined, { weekday:'short' }).slice(0,3) + '</span>' +
             '<span class="date">' + dt.getDate() + '</span>' +
-            '<span class="lamp ' + d.level + '"></span>' +
+            mark(d.level) +
             '<span class="deg">' + d.temp + '\u00b0</span>';
           week.appendChild(cell);
         });
@@ -1430,6 +1472,10 @@ document.getElementById('installx').onclick = function(){
 window.addEventListener('appinstalled', function(){
   installBar.hidden = true;
   deferredInstall = null;
+});
+
+document.querySelectorAll('[data-mark]').forEach(function(el){
+  el.innerHTML = '<svg viewBox="0 0 12 12" aria-hidden="true">' + GLYPH[el.dataset.mark] + '</svg>';
 });
 
 closeCombo();
