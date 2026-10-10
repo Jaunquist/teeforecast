@@ -235,7 +235,7 @@
 
   .sunline{
     display:flex; align-items:center; gap:5px; flex-wrap:wrap;
-    font-size:13.5px; color:var(--ink); margin-bottom:11px;
+    font-size:13.5px; color:var(--ink); margin-bottom:7px;
   }
   .sunline b{ font-weight:400; color:var(--muted); }
   .sunline .sep{ color:var(--dead); }
@@ -299,6 +299,40 @@
   .r5{ height:14px; }
   .r6{ height:22px; }
   .r7{ height:12px; margin-top:6px; }
+  .r8{ height:12px; }
+  .agree{ font-size:10.5px; color:var(--dead); }
+  .agree.split{ color:var(--ink); font-weight:600; }
+  .hlabels .r8{ font-size:10px; }
+
+  .bandhead{ display:flex; flex-direction:column; flex:0 0 auto; }
+  .bandagree{ font-size:11.5px; font-weight:600; white-space:nowrap; opacity:.8; margin-top:3px; }
+
+  .radar{
+    display:flex; align-items:center; gap:7px; width:100%;
+    border:0; background:transparent; padding:0; margin:0 0 9px;
+    color:var(--ink); font-family:'Barlow',sans-serif; font-size:13px; text-align:left; cursor:pointer;
+  }
+  .radar svg{ width:15px; height:15px; flex:0 0 auto; fill:none; stroke:var(--muted);
+              stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+  .radar b{ font-weight:400; color:var(--muted); }
+  .radar .wet{ color:var(--stop); font-weight:600; }
+  .radar .near{ color:var(--hold-2); font-weight:600; }
+  :root:not([data-theme="light"]) .radar .near{ color:var(--hold); }
+  .radar:focus-visible{ outline:2px solid var(--go); outline-offset:2px; }
+  .radarmap{
+    position:relative; width:168px; height:168px; margin:-4px 0 12px;
+    border:1px solid var(--line); border-radius:8px; overflow:hidden; background:var(--raised);
+  }
+  .radarmap img{ position:absolute; left:-44px; top:-44px; width:256px; height:256px; }
+  .radarmap::before{ /* 10 km ring around the course */
+    content:''; position:absolute; left:50%; top:50%; width:17px; height:17px;
+    margin:-8.5px 0 0 -8.5px; border:1.5px solid var(--ink); border-radius:50%; z-index:2;
+  }
+  .radarmap::after{
+    content:''; position:absolute; left:50%; top:50%; width:4px; height:4px;
+    margin:-2px 0 0 -2px; background:var(--ink); border-radius:50%; z-index:2;
+  }
+  .radarmap span{ position:absolute; left:6px; bottom:4px; font-size:10px; color:var(--muted); z-index:2; }
 
   .hlabels .r6{ flex-direction:column; align-items:flex-end; justify-content:center; gap:0; }
   .hlabels .unit{
@@ -420,7 +454,7 @@
 
   .key{
     display:flex; flex-wrap:wrap; gap:3px 14px;
-    border-top:1px solid var(--line); margin-top:16px; padding-top:10px;
+    border-top:1px solid var(--line); margin-top:10px; padding-top:10px;
     font-size:12px; color:var(--muted);
   }
   .key i{ display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:6px; }
@@ -486,9 +520,9 @@
 </div>
 
 <p class="credit">
-  Forecasts from <a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo</a>, free for non-commercial use.
-  Wind arrows show the direction the wind is blowing towards. Ground is inferred from 72&nbsp;hours of rainfall and
-  modelled soil moisture &mdash; it is not a course report, and drainage varies a lot between clubs.
+  Forecasts by <a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo</a> (non-commercial use), a vote of
+  the ECMWF, ICON and GFS models. Radar by <a href="https://www.rainviewer.com/" target="_blank" rel="noopener">RainViewer</a> from PAGASA radars.
+  Wind arrows point where the wind blows. Ground is inferred from rainfall and modelled soil moisture, not a course report.
 </p>
 
 <script>
@@ -719,11 +753,54 @@ function url(c){
     + '&timezone=auto&past_days=3&forecast_days=7';
 }
 
-async function fetchCourse(c){
-  const res = await fetch(url(c));
+/* Three independent global models, each from a different national weather
+   service. Each is fetched on its own, so one being down never breaks the
+   others; with none available the app falls back to the best-match feed. */
+const MODELS = [
+  { id:'ecmwf_ifs',   name:'ECMWF' },
+  { id:'icon_global', name:'ICON'  },
+  { id:'gfs_global',  name:'GFS'   }
+];
+
+function modelUrl(c, m){
+  return 'https://api.open-meteo.com/v1/forecast'
+    + '?latitude=' + c.lat + '&longitude=' + c.lon
+    + '&hourly=temperature_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m,wind_gusts_10m'
+    + '&models=' + m.id + '&timezone=auto&forecast_days=7';
+}
+
+async function getJSON(u){
+  const res = await fetch(u);
   if(!res.ok) throw new Error('HTTP ' + res.status);
-  const j = await res.json();
-  const h = j.hourly;
+  return res.json();
+}
+
+function median(xs){
+  const v = xs.filter(function(x){ return x != null && !isNaN(x); }).sort(function(a,b){ return a-b; });
+  if(!v.length) return null;
+  const m = Math.floor(v.length / 2);
+  return v.length % 2 ? v[m] : (v[m-1] + v[m]) / 2;
+}
+
+// Majority wins. A lone storm call still lifts the hour to Caution — on a
+// golf course, one model seeing lightning is worth a warning.
+function vote(levels){
+  const n = levels.length;
+  const stops = levels.filter(function(l){ return l === 'stop'; }).length;
+  const holds = levels.filter(function(l){ return l !== 'go'; }).length;
+  if(stops * 2 > n) return 'stop';
+  if(holds * 2 > n || stops) return 'hold';
+  return 'go';
+}
+
+async function fetchCourse(c){
+  const all = await Promise.allSettled([getJSON(url(c))].concat(MODELS.map(function(m){
+    return getJSON(modelUrl(c, m));
+  })));
+  if(all[0].status !== 'fulfilled') throw all[0].reason;
+
+  const j  = all[0].value;
+  const h  = j.hourly;
   const dl = j.daily || {};
   const sun = {};
   if(dl.time){
@@ -734,12 +811,27 @@ async function fetchCourse(c){
       };
     });
   }
-  const soilSeries = h.soil_moisture_3_to_9cm || null;
-  const windSeries = h.wind_speed_10m || null;
-  const dirSeries  = h.wind_direction_10m || null;
+
+  // Each model's hours, keyed by local time, keeping only usable rows.
+  const runs = [];
+  all.slice(1).forEach(function(r, k){
+    if(r.status !== 'fulfilled' || !r.value.hourly) return;
+    const mh = r.value.hourly, byT = {};
+    mh.time.forEach(function(t, i){
+      if(mh.precipitation[i] == null || mh.weather_code[i] == null) return;
+      byT[t] = {
+        temp: mh.temperature_2m[i], feels: mh.apparent_temperature[i],
+        mm: mh.precipitation[i] || 0, code: mh.weather_code[i],
+        wind: mh.wind_speed_10m ? mh.wind_speed_10m[i] : null,
+        gust: mh.wind_gusts_10m ? mh.wind_gusts_10m[i] : null, pop: null
+      };
+    });
+    runs.push({ name: MODELS[k].name, byT: byT });
+  });
 
   const rows = h.time.map(function(t, i){
-    return {
+    const base = {
+      t: t,
       ms:   new Date(t).getTime(),
       date: t.slice(0, 10),
       hour: parseInt(t.slice(11, 13), 10),
@@ -749,10 +841,29 @@ async function fetchCourse(c){
       pop:  h.precipitation_probability[i],
       code: h.weather_code[i],
       gust: h.wind_gusts_10m[i],
-      wind: windSeries ? windSeries[i] : null,
-      dir:  dirSeries  ? dirSeries[i]  : null,
-      soil: soilSeries ? soilSeries[i] : null
+      wind: h.wind_speed_10m ? h.wind_speed_10m[i] : null,
+      dir:  h.wind_direction_10m ? h.wind_direction_10m[i] : null,
+      soil: h.soil_moisture_3_to_9cm ? h.soil_moisture_3_to_9cm[i] : null
     };
+    const ms = runs.map(function(r){ return r.byT[t]; }).filter(Boolean);
+    if(!ms.length) return base;                       // past hours, or no models
+
+    const levels = ms.map(hourLevel);
+    const level  = vote(levels);
+    // Show the weather of the models that carried the vote.
+    const winners = ms.filter(function(m, k){ return levels[k] === level; });
+    const pick = winners.length ? winners : ms;
+    return Object.assign(base, {
+      temp:  median(ms.map(function(m){ return m.temp; })),
+      feels: median(ms.map(function(m){ return m.feels; })),
+      mm:    median(pick.map(function(m){ return m.mm; })),
+      wind:  median(ms.map(function(m){ return m.wind; })),
+      gust:  median(ms.map(function(m){ return m.gust; })),
+      code:  Math.max.apply(null, pick.map(function(m){ return m.code; })),
+      level: level,
+      agree: levels.filter(function(l){ return l === level; }).length,
+      n:     ms.length
+    });
   });
 
   // past_days=3 + forecast_days=7 gives 10 dates; the last 7 are today onward.
@@ -769,8 +880,17 @@ async function fetchCourse(c){
     const start  = tee[0].ms;
     const prior  = rows.filter(function(r){ return r.ms < start && r.ms >= start - 72 * 3600 * 1000; });
     const rain72 = prior.reduce(function(s, r){ return s + r.mm; }, 0);
+    const verdict = rate(tee);
 
-    return Object.assign({ date:date }, rate(tee), ground(rain72, tee[0].soil),
+    // How many models, judged on their own, reach the same verdict.
+    const own = runs.map(function(r){
+      const hrs = tee.map(function(x){ return r.byT[x.t]; }).filter(Boolean);
+      return hrs.length === tee.length ? rate(hrs).level : null;
+    }).filter(Boolean);
+    const agree = own.length ? { agree: own.filter(function(l){ return l === verdict.level; }).length,
+                                 n: own.length } : {};
+
+    return Object.assign({ date:date }, verdict, agree, ground(rain72, tee[0].soil),
                          { rain72:rain72 }, sun[date] || {});
   }).filter(Boolean);
 
@@ -782,12 +902,13 @@ async function fetchCourse(c){
         return {
           hour:r.hour, temp:Math.round(r.temp), mm:r.mm, pop:r.pop, code:r.code,
           wind:(r.wind == null ? null : Math.round(r.wind)),
-          dir:r.dir, level:hourLevel(r)
+          dir:r.dir, level: r.level || hourLevel(r),
+          agree: r.agree, n: r.n
         };
       });
   });
 
-  return { days:days, hours:hours };
+  return { days:days, hours:hours, models: runs.map(function(r){ return r.name; }) };
 }
 
 function hourLevel(r){
@@ -804,8 +925,8 @@ function rate(hrs){
   const peak  = max(function(h){ return h.mm; });
   const feels = max(function(h){ return h.feels; });
   const temp  = max(function(h){ return h.temp; });
-  const pop   = max(function(h){ return h.pop; });
-  const gust  = max(function(h){ return h.gust; });
+  const pop   = max(function(h){ return h.pop || 0; });
+  const gust  = max(function(h){ return h.gust || 0; });
 
   const storm = hrs.find(function(h){ return h.code >= 95; });
   const wet   = hrs.find(function(h){ return h.mm >= 0.2; });
@@ -879,6 +1000,129 @@ function shortDate(d){
 }
 function longDate(d){
   return new Date(d + 'T00:00:00').toLocaleDateString(undefined, { weekday:'long', month:'short', day:'numeric' });
+}
+
+/* ==================================================================
+   6b. RADAR — what is falling now, from RainViewer (PAGASA radars).
+   Observed, not forecast: RainViewer dropped future frames in 2026.
+   Zoom 7 is the free-tier ceiling, roughly 1.2 km per pixel here.
+   ================================================================== */
+
+const RADAR = { meta:null, at:0, res:{}, open:false };
+const RADAR_KM_PER_PX = 1.18;
+const RADAR_REACH_PX  = 17;      // ~20 km search radius
+const RADAR_AT_PX     = 2;       // within ~2.5 km counts as "at the course"
+const RADAR_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="1.6"/>' +
+  '<path d="M12 12l6-6"/><path d="M7.8 16.2a6 6 0 1 1 8.4 0"/><path d="M4.9 19.1a10 10 0 1 1 14.2 0"/></svg>';
+
+async function radarMeta(){
+  if(RADAR.meta && Date.now() - RADAR.at < 5 * 60000) return RADAR.meta;
+  const j = await getJSON('https://api.rainviewer.com/public/weather-maps.json');
+  const past = j.radar && j.radar.past;
+  if(!past || !past.length) throw new Error('no frames');
+  RADAR.meta = { host: j.host, frame: past[past.length - 1] };
+  RADAR.at = Date.now();
+  return RADAR.meta;
+}
+
+function radarCoord(c){ return c.lat.toFixed(4) + '/' + c.lon.toFixed(4); }
+function radarTile(m, c){   // colour scheme 2 = Universal Blue, the one still offered
+  return m.host + m.frame.path + '/256/7/' + radarCoord(c) + '/2/0_0.png';
+}
+function coverTile(m, c){
+  return m.host + '/v2/coverage/0/256/7/' + radarCoord(c) + '/0/0_0.png';
+}
+
+function loadPixels(src){
+  return new Promise(function(ok, fail){
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = function(){
+      try {
+        const cv = document.createElement('canvas'); cv.width = cv.height = 256;
+        const cx = cv.getContext('2d'); cx.drawImage(img, 0, 0, 256, 256);
+        ok(cx.getImageData(0, 0, 256, 256).data);
+      } catch(e){ fail(e); }                       // canvas tainted: no CORS
+    };
+    img.onerror = function(){ fail(new Error('load')); };
+    img.src = src;
+  });
+}
+
+const COMPASS = ['N','NE','E','SE','S','SW','W','NW'];
+
+async function radarCheck(c){
+  const m = await radarMeta();
+  const key = c.id + m.frame.path;
+  if(RADAR.res[key]) return RADAR.res[key];
+
+  const out = { time: m.frame.time, tile: radarTile(m, c) };
+  let px;
+  try { px = await loadPixels(out.tile); }
+  catch(e){ out.state = 'view'; return (RADAR.res[key] = out); }
+
+  try {                                            // black = outside radar range
+    const cov = await loadPixels(coverTile(m, c));
+    if(cov[(128 * 256 + 128) * 4 + 3] > 128){ out.state = 'none'; return (RADAR.res[key] = out); }
+  } catch(e){ /* coverage unknown — carry on */ }
+
+  let best = null;
+  for(let y = 128 - RADAR_REACH_PX; y <= 128 + RADAR_REACH_PX; y++){
+    for(let x = 128 - RADAR_REACH_PX; x <= 128 + RADAR_REACH_PX; x++){
+      const d = Math.hypot(x - 128, y - 128);
+      if(d > RADAR_REACH_PX || px[(y * 256 + x) * 4 + 3] < 40) continue;
+      if(!best || d < best.d) best = { d:d, x:x - 128, y:y - 128 };
+    }
+  }
+  if(!best) out.state = 'dry';
+  else if(best.d <= RADAR_AT_PX) out.state = 'at';
+  else {
+    out.state = 'near';
+    out.km = Math.max(3, Math.round(best.d * RADAR_KM_PER_PX));
+    const deg = (Math.atan2(best.x, -best.y) * 180 / Math.PI + 360) % 360;
+    out.dir = COMPASS[Math.round(deg / 45) % 8];
+  }
+  return (RADAR.res[key] = out);
+}
+
+function radarClock(unix){
+  return new Date(unix * 1000).toLocaleTimeString(undefined, { hour:'numeric', minute:'2-digit' });
+}
+
+function radarLine(c){
+  const box = document.createElement('div');
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'radar';
+  btn.innerHTML = RADAR_ICON + '<b>Radar</b> <span>checking…</span>';
+  box.appendChild(btn);
+
+  function paint(r){
+    const t = r.time ? ' ' + radarClock(r.time) : '';
+    const say = {
+      at:   '<span class="wet">Rain at the course now</span>',
+      near: '<span class="near">Rain ' + r.km + ' km ' + r.dir + '</span>',
+      dry:  'No rain within 20 km',
+      none: 'No radar coverage here',
+      view: 'Tap to view',
+      fail: 'Unavailable right now'
+    }[r.state];
+    btn.innerHTML = RADAR_ICON + '<b>Radar' + t + '</b> <span>' + say + '</span>';
+    btn.setAttribute('aria-expanded', String(RADAR.open && !!r.tile));
+    const old = box.querySelector('.radarmap'); if(old) old.remove();
+    if(RADAR.open && r.tile){
+      const map = document.createElement('div');
+      map.className = 'radarmap';
+      map.innerHTML = '<img alt="Radar around the course" src="' + r.tile + '"><span>ring ≈ 10 km</span>';
+      box.appendChild(map);
+    }
+  }
+
+  let last = null;
+  btn.onclick = function(){ if(last && last.tile){ RADAR.open = !RADAR.open; paint(last); } };
+  radarCheck(c).then(function(r){ last = r; paint(r); })
+               .catch(function(){ last = { state:'fail' }; paint(last); });
+  return box;
 }
 
 /* ==================================================================
@@ -1058,9 +1302,16 @@ function renderCourse(){
   band.setAttribute('role', 'status');
   band.innerHTML = '<span class="bandmark"><svg viewBox="0 0 12 12" aria-hidden="true">' +
                    GLYPH[d.level] + '</svg></span>' +
-                   '<span class="bandword"></span><span class="bandtext"></span>';
+                   '<span class="bandhead"><span class="bandword"></span>' +
+                   (d.n ? '<span class="bandagree"></span>' : '') + '</span>' +
+                   '<span class="bandtext"></span>';
   band.querySelector('.bandword').textContent = WORD[d.level];
   band.querySelector('.bandtext').textContent = d.reason + ' \u00b7 ' + d.temp + '\u00b0, feels ' + d.feels + '\u00b0';
+  if(d.n){
+    const ag = band.querySelector('.bandagree');
+    ag.textContent = d.agree + '/' + d.n + (d.agree === d.n ? ' agree' : ' split');
+    ag.title = (entry.models || []).join(', ') + ' \u2014 how many models reach this verdict on their own';
+  }
   detail.appendChild(band);
 
   const gl = document.createElement('p');
@@ -1078,6 +1329,8 @@ function renderCourse(){
                    SUNSET + '<b>Sunset</b> ' + fmtTime(d.sunset);
     detail.appendChild(sl);
   }
+
+  if(dayIdx === 0) detail.appendChild(radarLine(c));
 
   const nowH = new Date().getHours();
 
@@ -1117,7 +1370,8 @@ function renderCourse(){
     '<span class="r4">Rain</span>' +
     '<span class="r5 lc">mm</span>' +
     '<span class="r6">Wind<em class="unit">km/h</em></span>' +
-    '<span class="r7">Play</span>';
+    '<span class="r7">Play</span>' +
+    '<span class="r8">Agree</span>';
   wrap.appendChild(labels);
 
   const cells = [];
@@ -1142,9 +1396,12 @@ function renderCourse(){
           (r.dir == null ? '' : windArrow(r.dir)) + r.wind + '</span>') +
       '<span class="htick r7 ' + r.level + '">' +
       (r.level === 'stop' ? '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 3l6 6M9 3L3 9"/></svg>' : '') +
-      '</span>';
+      '</span>' +
+      '<span class="agree r8' + (r.n && r.agree < r.n ? ' split' : '') + '">' +
+      (r.n ? r.agree + '/' + r.n : '') + '</span>';
     cell.title = clock(r.hour) + ' \u00b7 ' + r.temp + '\u00b0 \u00b7 ' + r.mm.toFixed(1) + 'mm \u00b7 ' +
-                 r.pop + '%' + (r.wind == null ? '' : ' \u00b7 wind ' + r.wind + ' km/h');
+                 r.pop + '%' + (r.wind == null ? '' : ' \u00b7 wind ' + r.wind + ' km/h') +
+                 (r.n ? ' \u00b7 ' + r.agree + ' of ' + r.n + ' models agree' : '');
     wrap.appendChild(cell);
     cells.push({ el:cell, hour:r.hour });
   });
@@ -1191,8 +1448,6 @@ function renderCourse(){
       if(first && target) wrap.scrollLeft = target.offsetLeft - first.offsetLeft;
     });
   }
-  detail.insertAdjacentHTML('beforeend',
-    '<p class="scrollnote">5am to 7pm \u00b7 scroll sideways \u00b7 bar is rainfall, arrow is wind</p>');
 }
 
 function openCourse(id){
@@ -1423,6 +1678,7 @@ async function refresh(){
   btn.classList.add('spin');
   stamp.textContent = 'Refreshing\u2026';
 
+  RADAR.at = 0;                                    // fresh radar frame on refresh
   const ids = needed();
   await Promise.all(ids.map(async function(id){
     const c = course(id);
