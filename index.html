@@ -42,6 +42,10 @@
     --soft:   #C29A55;
     --sodden: #8A6332;
     --rain:   #94A3B3;
+    --src0:   #A98BE0;
+    --src1:   #36B3A3;
+    --src2:   #C9CDD2;
+    --tintpct: 11%;
     --onband: #0E1D18;
     --shadow: rgba(0,0,0,.45);
   }
@@ -63,6 +67,10 @@
     --soft:   #A87A36;
     --sodden: #6B4A1F;
     --rain:   #5D6B7A;
+    --src0:   #6E4FB8;
+    --src1:   #11897A;
+    --src2:   #2E3A35;
+    --tintpct: 8%;
     --onband: #FFFFFF;
     --shadow: rgba(20,40,30,.16);
   }
@@ -300,20 +308,56 @@
   .r6{ height:22px; }
   .r7{ height:12px; margin-top:6px; }
   .r8{ height:12px; }
-  .mrow{ display:none !important; }
-  .hwrap.models .mrow{ display:flex !important; }
-  .hwrap .mrow.m0{ height:15px; margin-top:7px; }
+  .msec{ display:none !important; }
+  .hwrap.models .msec{ display:flex !important; flex-direction:column; align-items:stretch;
+                       gap:3px; width:100%; margin-top:7px; padding-bottom:3px; }
+  .hlabels .msec .mrow{ justify-content:flex-end; }
+  .hwrap .mrow{ display:flex; align-items:center; justify-content:center; }
+  .hwrap .mrow.m0{ height:15px; }
   .hwrap .mrow.m1{ height:16px; }
   .hwrap .mrow.m2{ height:13px; }
   .hwrap .mrow.m3{ height:7px; margin-top:0; }
-  .hcell > .mrow.m0{ width:100%; border-top:1px dashed var(--line); }
-  .hlabels .mname{ text-transform:none; letter-spacing:.02em; color:var(--ink); font-size:11.5px;
-                   border-top:1px dashed var(--line); }
+  /* Source colours: violet, teal, neutral. Lightness differs as well as hue,
+     so all three stay apart under red-green colour blindness. They never
+     touch the ticks, which keep their status colours. */
+  .s0{ --sk:var(--src0); } .s1{ --sk:var(--src1); } .s2{ --sk:var(--src2); }
+  .hcell > .msec{   /* fill the 3px column gap so each source reads as one band */
+    --tint:color-mix(in srgb, var(--sk) var(--tintpct), transparent);
+    background:var(--tint); box-shadow:3px 0 0 var(--tint);
+  }
+  .hlabels > .msec{ /* opaque: hours scroll underneath the frozen labels */
+    --tint:color-mix(in srgb, var(--sk) var(--tintpct), var(--turf));
+    background:var(--tint); box-shadow:7px 0 0 var(--tint);
+  }
+  .hwrap .mrow.m0{ border-top:2px solid var(--sk); }
+  .hlabels .mname{ text-transform:none; letter-spacing:.02em; font-size:11.5px; }
+  .msrc{
+    border:0; background:transparent; padding:0 0 0 1px; cursor:pointer;
+    font:inherit; font-weight:700; letter-spacing:inherit; color:var(--sk);
+    text-decoration:underline dotted; text-underline-offset:2px;
+  }
+  .msrc:focus-visible{ outline:2px solid var(--go); outline-offset:1px; }
   .hlabels .m1, .hlabels .m2, .hlabels .m3{ font-size:9.5px; }
   .hcell > .mrow.m1 svg{ width:14px; height:14px; }
-  .hcell > .mrow.htick{ width:24px; border-radius:3px; }
-  .hcell > .mrow.htick svg{ width:6px; height:6px; }
-  .hcell > .mrow.htick.odd{ outline:1.5px solid var(--ink); outline-offset:1px; }
+  .mrow.m3 > .htick{ width:24px; height:7px; border-radius:3px; display:flex; align-items:center; justify-content:center; }
+  .mrow.m3 > .htick svg{ width:6px; height:6px; }
+  .mrow.m3 > .htick.odd{ outline:1.5px solid var(--ink); outline-offset:1px; }
+
+  .srcpop{
+    position:fixed; z-index:60; width:min(250px, calc(100vw - 32px));
+    background:var(--raised); color:var(--ink);
+    border:1px solid var(--line); border-top:3px solid var(--sk); border-radius:9px;
+    padding:10px 12px 11px; box-shadow:0 12px 28px var(--shadow);
+    font-size:12.5px; line-height:1.4;
+  }
+  .srcpop[hidden]{ display:none; }
+  .sphead{ display:block; font-family:'Barlow Condensed',sans-serif; font-size:16px; color:var(--sk); }
+  .sporg{ color:var(--muted); margin:1px 0 8px; }
+  .srcpop dl{ display:grid; grid-template-columns:auto 1fr; gap:2px 12px; margin:0 0 8px; }
+  .srcpop dt{ color:var(--muted); }
+  .srcpop dd{ margin:0; font-weight:600; }
+  .spstat{ margin:0 0 6px; font-weight:600; }
+  .spnote{ margin:0; color:var(--muted); font-size:11.5px; }
   .mtog{
     display:flex; align-items:center; justify-content:flex-end; gap:2px;
     border:0; background:transparent; padding:0; cursor:pointer;
@@ -782,10 +826,17 @@ function url(c){
    service. Each is fetched on its own, so one being down never breaks the
    others; with none available the app falls back to the best-match feed. */
 const MODELS = [
-  { id:'ecmwf_ifs',   name:'ECMWF' },
-  { id:'icon_global', name:'ICON'  },
-  { id:'gfs_global',  name:'GFS'   }
+  { id:'ecmwf_ifs',   name:'ECMWF', model:'IFS HRES',
+    org:'European Centre for Medium-Range Weather Forecasts', where:'Europe',
+    grid:'9 km', runs:'Every 6 hours', range:'15 days', note:'Open data since October 2025' },
+  { id:'icon_global', name:'ICON',  model:'ICON Global',
+    org:'Deutscher Wetterdienst (German Weather Service)', where:'Germany',
+    grid:'~11 km', runs:'Every 6 hours', range:'7.5 days' },
+  { id:'gfs_global',  name:'GFS',   model:'GFS',
+    org:'NOAA (U.S. National Oceanic and Atmospheric Administration)', where:'United States',
+    grid:'~13 km', runs:'Every 6 hours', range:'16 days' }
 ];
+function srcIdx(name){ return Math.max(0, MODELS.findIndex(function(m){ return m.name === name; })); }
 
 function modelUrl(c, m){
   return 'https://api.open-meteo.com/v1/forecast'
@@ -1155,6 +1206,68 @@ function radarLine(c){
 }
 
 /* ==================================================================
+   6c. SOURCE POPOVER — tap (or hover, with a mouse) a model name.
+   ================================================================== */
+
+const SRCPOP = { el:null, btn:null, pinned:false };
+
+function closeSrcPop(){
+  if(SRCPOP.el) SRCPOP.el.hidden = true;
+  if(SRCPOP.btn) SRCPOP.btn.setAttribute('aria-expanded', 'false');
+  SRCPOP.btn = null; SRCPOP.pinned = false;
+}
+
+function openSrcPop(btn, name, k, hours, pin){
+  const meta = MODELS[srcIdx(name)];
+  if(!SRCPOP.el){
+    SRCPOP.el = document.createElement('div');
+    SRCPOP.el.className = 'srcpop';
+    SRCPOP.el.setAttribute('role', 'dialog');
+    document.body.appendChild(SRCPOP.el);
+  }
+  const el = SRCPOP.el;
+  const rows = hours.filter(function(r){ return r.per && r.per[k]; });
+  const same = rows.filter(function(r){ return r.per[k].level === r.level; }).length;
+
+  el.className = 'srcpop s' + srcIdx(name);
+  el.setAttribute('aria-label', name + ' details');
+  el.innerHTML =
+    '<b class="sphead"></b><p class="sporg"></p>' +
+    '<dl><dt>Model</dt><dd></dd><dt>Grid</dt><dd></dd><dt>New run</dt><dd></dd><dt>Range</dt><dd></dd></dl>' +
+    (rows.length ? '<p class="spstat"></p>' : '') +
+    '<p class="spnote"></p>';
+  el.querySelector('.sphead').textContent = name + ' · ' + meta.where;
+  el.querySelector('.sporg').textContent = meta.org;
+  const dd = el.querySelectorAll('dd');
+  dd[0].textContent = meta.model; dd[1].textContent = meta.grid;
+  dd[2].textContent = meta.runs;  dd[3].textContent = meta.range;
+  if(rows.length) el.querySelector('.spstat').textContent =
+    'Matched the final call in ' + same + ' of ' + rows.length + ' hours shown.';
+  el.querySelector('.spnote').textContent =
+    (meta.note ? meta.note + '. ' : '') + 'Sky, mm and play in its rows are this model alone, before the vote.';
+
+  el.hidden = false;
+  const b = btn.getBoundingClientRect();
+  const w = el.offsetWidth, h = el.offsetHeight;
+  let left = Math.min(Math.max(8, b.left), window.innerWidth - w - 8);
+  let top  = b.bottom + 6;
+  if(top + h > window.innerHeight - 8) top = Math.max(8, b.top - h - 6);
+  el.style.left = left + 'px';
+  el.style.top  = top + 'px';
+
+  if(SRCPOP.btn && SRCPOP.btn !== btn) SRCPOP.btn.setAttribute('aria-expanded', 'false');
+  SRCPOP.btn = btn; SRCPOP.pinned = !!pin;
+  btn.setAttribute('aria-expanded', 'true');
+}
+
+document.addEventListener('pointerdown', function(e){
+  if(SRCPOP.el && !SRCPOP.el.hidden && !SRCPOP.el.contains(e.target) &&
+     !(SRCPOP.btn && SRCPOP.btn.contains(e.target))) closeSrcPop();
+});
+document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeSrcPop(); });
+window.addEventListener('scroll', closeSrcPop, { passive:true });
+
+/* ==================================================================
    7. COMBOBOX — one field, typed search or full browsable list
    ================================================================== */
 
@@ -1245,6 +1358,7 @@ document.addEventListener('pointerdown', function(e){
    ================================================================== */
 
 function renderCourse(){
+  closeSrcPop();
   detail.innerHTML = '';
 
   const c = course(current);
@@ -1408,10 +1522,13 @@ function renderCourse(){
         'aria-label="Show what each model forecasts">Agree<svg viewBox="0 0 12 12" aria-hidden="true">' +
         '<path d="M3 4.5l3 3 3-3"/></svg></button>'
       : '<span class="r8">Agree</span>') +
-    names.map(function(n){
-      return '<span class="mrow m0 mname">' + n + '</span>' +
+    names.map(function(n, k){
+      const sc = ' s' + srcIdx(n);
+      return '<span class="msec' + sc + '">' +
+             '<span class="mrow m0 mname"><button type="button" class="msrc" data-k="' + k + '" ' +
+               'aria-label="About ' + n + '">' + n + '</button></span>' +
              '<span class="mrow m1">Sky</span><span class="mrow m2 lc">mm</span>' +
-             '<span class="mrow m3">Play</span>';
+             '<span class="mrow m3">Play</span></span>';
     }).join('');
   wrap.appendChild(labels);
   const tog = labels.querySelector('.mtog');
@@ -1419,7 +1536,21 @@ function renderCourse(){
     modelsOpen = !modelsOpen;
     wrap.classList.toggle('models', modelsOpen);
     tog.setAttribute('aria-expanded', String(modelsOpen));
+    if(!modelsOpen) closeSrcPop();
   };
+  labels.querySelectorAll('.msrc').forEach(function(btn){
+    const k = +btn.dataset.k;
+    const show = function(pin){ openSrcPop(btn, names[k], k, entry.hours[date], pin); };
+    btn.onclick = function(e){
+      e.stopPropagation();
+      if(SRCPOP.btn === btn && SRCPOP.pinned) closeSrcPop(); else show(true);
+    };
+    if(window.matchMedia('(hover: hover)').matches){
+      btn.onmouseenter = function(){ if(!SRCPOP.pinned) show(false); };
+      btn.onmouseleave = function(){ if(!SRCPOP.pinned) closeSrcPop(); };
+    }
+  });
+  wrap.addEventListener('scroll', closeSrcPop, { passive:true });
 
   const cells = [];
 
@@ -1447,17 +1578,18 @@ function renderCourse(){
       '<span class="agree r8' + (r.n && r.agree < r.n ? ' split' : '') + '">' +
       (r.n ? r.agree + '/' + r.n : '') + '</span>' +
       names.map(function(n, k){
+        const sc = ' s' + srcIdx(n);
         const m = r.per && r.per[k];
-        if(!m) return '<span class="mrow m0"></span><span class="mrow m1"></span>' +
-                      '<span class="mrow m2"></span><span class="mrow m3"></span>';
+        if(!m) return '<span class="msec' + sc + '"><span class="mrow m0"></span><span class="mrow m1"></span>' +
+                      '<span class="mrow m2"></span><span class="mrow m3"></span></span>';
         const g = icon(m.code);
-        return '<span class="mrow m0"></span>' +
-          '<span class="mrow m1 wx ' + g.cls + '">' + g.svg + '</span>' +
+        return '<span class="msec' + sc + '"><span class="mrow m0"></span>' +
+          '<span class="mrow m1"><span class="wx ' + g.cls + '">' + g.svg + '</span></span>' +
           '<span class="mrow m2 hmm' + (m.mm >= RULES.heavyPeak ? ' soaking' : (m.mm >= RULES.mmAmber ? ' wet' : '')) + '">' +
             (m.mm >= 0.1 ? m.mm.toFixed(1) : '') + '</span>' +
-          '<span class="mrow m3 htick ' + m.level + (m.level !== r.level ? ' odd' : '') + '">' +
+          '<span class="mrow m3"><i class="htick ' + m.level + (m.level !== r.level ? ' odd' : '') + '">' +
             (m.level === 'stop' ? '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 3l6 6M9 3L3 9"/></svg>' : '') +
-          '</span>';
+          '</i></span></span>';
       }).join('');
     cell.title = clock(r.hour) + ' \u00b7 ' + r.temp + '\u00b0 \u00b7 ' + r.mm.toFixed(1) + 'mm \u00b7 ' +
                  r.pop + '%' + (r.wind == null ? '' : ' \u00b7 wind ' + r.wind + ' km/h') +
