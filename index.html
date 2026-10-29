@@ -45,6 +45,7 @@
     --src0:   #A98BE0;
     --src1:   #36B3A3;
     --src2:   #C9CDD2;
+    --src3:   #8FD16A;
     --tintpct: 11%;
     --onband: #0E1D18;
     --shadow: rgba(0,0,0,.45);
@@ -70,6 +71,7 @@
     --src0:   #6E4FB8;
     --src1:   #11897A;
     --src2:   #2E3A35;
+    --src3:   #4E8A2E;
     --tintpct: 8%;
     --onband: #FFFFFF;
     --shadow: rgba(20,40,30,.16);
@@ -320,7 +322,8 @@
   /* Source colours: violet, teal, neutral. Lightness differs as well as hue,
      so all three stay apart under red-green colour blindness. They never
      touch the ticks, which keep their status colours. */
-  .s0{ --sk:var(--src0); } .s1{ --sk:var(--src1); } .s2{ --sk:var(--src2); }
+  .s0{ --sk:var(--src0); } .s1{ --sk:var(--src1); } .s2{ --sk:var(--src2); } .s3{ --sk:var(--src3); }
+  .msec.filled > .mrow:not(.m0){ opacity:.45; }
   .hcell > .msec{   /* fill the 3px column gap so each source reads as one band */
     --tint:color-mix(in srgb, var(--sk) var(--tintpct), transparent);
     background:var(--tint); box-shadow:3px 0 0 var(--tint);
@@ -589,7 +592,7 @@
 
 <p class="credit">
   Forecasts by <a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo</a> (non-commercial use), a vote of
-  the ECMWF, ICON and GFS models. Radar by <a href="https://www.rainviewer.com/" target="_blank" rel="noopener">RainViewer</a> from PAGASA radars.
+  the ECMWF, ICON, GFS and CMA models. Radar by <a href="https://www.rainviewer.com/" target="_blank" rel="noopener">RainViewer</a> from PAGASA radars.
   Wind arrows point where the wind blows. Ground is inferred from rainfall and modelled soil moisture, not a course report.
 </p>
 
@@ -834,7 +837,12 @@ const MODELS = [
     grid:'~11 km', runs:'Every 6 hours', range:'7.5 days' },
   { id:'gfs_global',  name:'GFS',   model:'GFS',
     org:'NOAA (U.S. National Oceanic and Atmospheric Administration)', where:'United States',
-    grid:'~13 km', runs:'Every 6 hours', range:'16 days' }
+    grid:'~13 km', runs:'Every 6 hours', range:'16 days' },
+  { id:'cma_grapes_global', name:'CMA', model:'GRAPES Global', step:3,
+    org:'China Meteorological Administration', where:'China',
+    grid:'~15 km', runs:'Every 6 hours', range:'10 days',
+    note:'Forecasts in 3-hour steps; Open-Meteo fills the hours between, shown faded. ' +
+         'Its open-data feed has been unreliable lately, so it may sometimes be missing' }
 ];
 function srcIdx(name){ return Math.max(0, MODELS.findIndex(function(m){ return m.name === name; })); }
 
@@ -858,14 +866,15 @@ function median(xs){
   return v.length % 2 ? v[m] : (v[m-1] + v[m]) / 2;
 }
 
-// Majority wins. A lone storm call still lifts the hour to Caution — on a
-// golf course, one model seeing lightning is worth a warning.
+// Majority wins, and a tie goes to the more cautious call (2 of 4 seeing
+// storms means Avoid). A lone storm call still lifts the hour to Caution —
+// on a golf course, one model seeing lightning is worth a warning.
 function vote(levels){
   const n = levels.length;
   const stops = levels.filter(function(l){ return l === 'stop'; }).length;
   const holds = levels.filter(function(l){ return l !== 'go'; }).length;
-  if(stops * 2 > n) return 'stop';
-  if(holds * 2 > n || stops) return 'hold';
+  if(stops * 2 >= n) return 'stop';
+  if(holds * 2 >= n || stops) return 'hold';
   return 'go';
 }
 
@@ -893,13 +902,16 @@ async function fetchCourse(c){
   all.slice(1).forEach(function(r, k){
     if(r.status !== 'fulfilled' || !r.value.hourly) return;
     const mh = r.value.hourly, byT = {};
+    const step = MODELS[k].step || 1;
+    const offH = (r.value.utc_offset_seconds || 0) / 3600;
     mh.time.forEach(function(t, i){
       if(mh.precipitation[i] == null || mh.weather_code[i] == null) return;
       byT[t] = {
         temp: mh.temperature_2m[i], feels: mh.apparent_temperature[i],
         mm: mh.precipitation[i] || 0, code: mh.weather_code[i],
         wind: mh.wind_speed_10m ? mh.wind_speed_10m[i] : null,
-        gust: mh.wind_gusts_10m ? mh.wind_gusts_10m[i] : null, pop: null
+        gust: mh.wind_gusts_10m ? mh.wind_gusts_10m[i] : null, pop: null,
+        filled: step > 1 && ((((parseInt(t.slice(11, 13), 10) - offH) % 24) + 24) % 24) % step !== 0
       };
     });
     runs.push({ name: MODELS[k].name, byT: byT });
@@ -925,7 +937,7 @@ async function fetchCourse(c){
     const ms = aligned.filter(Boolean);
     if(!ms.length) return base;                       // past hours, or no models
     base.per = aligned.map(function(m){
-      return m ? { code:m.code, mm:m.mm, level:hourLevel(m) } : null;
+      return m ? { code:m.code, mm:m.mm, level:hourLevel(m), filled:m.filled } : null;
     });
 
     const levels = ms.map(hourLevel);
@@ -1583,7 +1595,8 @@ function renderCourse(){
         if(!m) return '<span class="msec' + sc + '"><span class="mrow m0"></span><span class="mrow m1"></span>' +
                       '<span class="mrow m2"></span><span class="mrow m3"></span></span>';
         const g = icon(m.code);
-        return '<span class="msec' + sc + '"><span class="mrow m0"></span>' +
+        return '<span class="msec' + sc + (m.filled ? ' filled' : '') + '"' +
+          (m.filled ? ' title="' + n + ' gives 3-hour steps; this hour is filled in"' : '') + '><span class="mrow m0"></span>' +
           '<span class="mrow m1"><span class="wx ' + g.cls + '">' + g.svg + '</span></span>' +
           '<span class="mrow m2 hmm' + (m.mm >= RULES.heavyPeak ? ' soaking' : (m.mm >= RULES.mmAmber ? ' wet' : '')) + '">' +
             (m.mm >= 0.1 ? m.mm.toFixed(1) : '') + '</span>' +
