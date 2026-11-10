@@ -18,7 +18,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --turf:   #0E1D18;
@@ -531,11 +531,151 @@
   .key i{ display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:6px; }
   .kitem{ display:inline-flex; align-items:center; gap:6px; }
   .key i.bar{ width:14px; height:5px; border-radius:3px; }
-  .key b{ width:100%; font-weight:600; color:var(--dead); font-size:11px; margin-top:10px; }
-  .key b:first-child{ margin-top:0; }
+  .key b{ min-width:48px; font-weight:600; color:var(--dead); font-size:11px; }
+  .key .br{ flex-basis:100%; height:0; }
 
   .credit{ margin-top:6px; font-size:9px; color:var(--dead); line-height:1.35; }
   .credit a{ color:var(--dead); }
+
+
+  /* ---------- look switch, vote link, pop-ups (both looks) ---------- */
+
+  .look{
+    display:flex; align-items:center; gap:8px; margin-top:8px;
+    font-size:12px; color:var(--muted);
+  }
+  .seg{ display:inline-flex; border:1px solid var(--line); border-radius:8px; overflow:hidden; }
+  .seg button{
+    font:inherit; font-weight:600; font-size:12px; padding:3px 10px; border:0; cursor:pointer;
+    background:transparent; color:var(--muted);
+  }
+  .seg button[aria-pressed="true"]{ background:var(--ink); color:var(--turf); }
+  .votelink{
+    margin-left:auto; font:inherit; font-weight:600; font-size:12px; color:var(--ink);
+    background:none; border:0; padding:3px 0; cursor:pointer; text-decoration:underline; text-underline-offset:3px;
+  }
+  .votelink[hidden]{ display:none; }
+
+  .pop{
+    position:fixed; inset:0; z-index:50; display:grid; place-items:center; padding:20px;
+    background:rgba(4,10,8,.62);
+  }
+  .pop[hidden]{ display:none; }
+  .popcard{
+    width:100%; max-width:340px; background:var(--raised); color:var(--ink);
+    border:1px solid var(--line); border-radius:16px; padding:18px 18px 16px;
+    box-shadow:0 12px 40px rgba(0,0,0,.45);
+  }
+  .popcard h2{ margin:0 0 6px; font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:24px; }
+  .popcard p{ margin:0 0 14px; font-size:14px; line-height:1.4; color:var(--muted); }
+  .popcard p b{ color:var(--ink); font-weight:600; }
+  .popbtns{ display:flex; gap:10px; }
+  .popbtns button{
+    flex:1; font:inherit; font-weight:600; font-size:15px; padding:10px 0; border-radius:10px; cursor:pointer;
+    border:1px solid var(--line); background:transparent; color:var(--ink);
+  }
+  .popbtns button.main{ background:var(--ink); color:var(--turf); border-color:var(--ink); }
+  .popbtns button[aria-pressed="true"]{ outline:3px solid var(--go); outline-offset:2px; }
+  .popnote{ margin:12px 0 0 !important; font-size:12.5px !important; min-height:1.4em; }
+
+  :root.game .seg{ border:2.5px solid var(--ol); border-radius:10px; background:var(--well); }
+  :root.game .seg button{ font-family:var(--hd); font-weight:400; font-size:13px; color:#fff; -webkit-text-stroke:3px var(--ol); paint-order:stroke fill; }
+  :root.game .seg button[aria-pressed="true"]{
+    color:var(--forest); -webkit-text-stroke:0;
+    background:linear-gradient(var(--ball) 0 60%, var(--ball-lo) 60%);
+  }
+  :root.game[data-theme="light"] .seg{ background:#5E7F70; }
+  :root.game[data-theme="light"] .sect{ color:var(--ink); -webkit-text-stroke:0; text-shadow:none; }
+  :root.game .votelink{ font-family:var(--hd); font-weight:400; font-size:14px; }
+  :root.game .popcard{ background:var(--panel); border:3px solid var(--ol); border-radius:18px; box-shadow:0 5px 0 var(--ol), 0 14px 40px rgba(0,0,0,.45); }
+  :root.game .popcard h2{ font-family:var(--hd); font-weight:400; font-size:26px; color:#fff; -webkit-text-stroke:4px var(--ol); paint-order:stroke fill; text-shadow:0 2px 0 var(--ol); }
+  :root.game .popbtns button{
+    font-family:var(--hd); font-weight:400; font-size:17px; border:3px solid var(--ol); color:#fff;
+    -webkit-text-stroke:3.5px var(--ol); paint-order:stroke fill; background:var(--well);
+    box-shadow:inset 0 3px 0 rgba(0,0,0,.25);
+  }
+  :root.game .popbtns button.main{
+    color:var(--forest); -webkit-text-stroke:0; border-color:var(--ol);
+    background:linear-gradient(var(--ball) 0 60%, var(--ball-lo) 60%);
+    box-shadow:inset 0 2px 0 #fff, 0 3px 0 var(--ol);
+  }
+
+  /* ---------- GAME LOOK (html.game) ---------- */
+  :root.game{--ol:#06100C; --panel:#1C362C; --panel-hi:#25473A; --panel-lo:#12241D; --well:#0A1712; --banner:#5BB13A; --banner-lo:#3E8424; --hd:'Lilita One','Barlow Condensed',sans-serif;}
+  :root.game[data-theme="light"]{--ol:#1D2B25; --panel:#FFFDF6; --panel-hi:#FFFFFF; --panel-lo:#E7E1CF; --well:#E9E4D4; --banner:#5BB13A; --banner-lo:#3E8424; --turf:#D9E8D2;}
+  :root.game h1, :root.game .bandword, :root.game .tab, :root.game .dtab > span:first-child, :root.game .crumb b, :root.game .sect{font-family:var(--hd); font-weight:400; letter-spacing:.01em; color:#fff; -webkit-text-stroke:4px var(--ol); paint-order:stroke fill; text-shadow:0 2px 0 var(--ol);}
+  :root.game header{padding-top:calc(10px + env(safe-area-inset-top)); padding-bottom:8px;}
+  :root.game .brand{background:linear-gradient(var(--banner) 0 62%, var(--banner-lo) 62%); border:3px solid var(--ol); border-radius:14px; padding:4px 12px 5px; box-shadow:inset 0 2px 0 rgba(255,255,255,.35), 0 3px 0 var(--ol);}
+  :root.game h1{font-size:27px; line-height:1.05;}
+  :root.game .stamp{color:#0B1F14; font-weight:600; font-size:11.5px; margin-top:0;}
+  :root.game .iconbtn{width:42px; height:42px; border:3px solid var(--ol); color:var(--ink); background:linear-gradient(var(--panel-hi) 0 55%, var(--panel) 55%); box-shadow:inset 0 -3px 0 var(--panel-lo), 0 3px 0 var(--ol);}
+  :root.game .iconbtn:active{transform:translateY(3px); box-shadow:inset 0 -1px 0 var(--panel-lo), 0 0 0 var(--ol);}
+  :root.game .iconbtn svg{stroke-width:2.6;}
+  :root.game .tabs{border:0; gap:8px; margin-bottom:10px;}
+  :root.game .tab{flex:1; font-size:17px; padding:5px 0 6px; margin:0; border:3px solid var(--ol); border-radius:12px; background:var(--well); color:#fff; opacity:.75; box-shadow:inset 0 3px 0 rgba(0,0,0,.25);}
+  :root.game .tab[aria-selected="true"]{opacity:1; border-color:var(--ol); background:linear-gradient(var(--banner) 0 55%, var(--banner-lo) 55%); box-shadow:inset 0 2px 0 rgba(255,255,255,.35), 0 3px 0 var(--ol); transform:translateY(-2px);}
+  :root.game #find{border:3px solid var(--ol) !important; border-radius:12px !important; background:var(--well) !important; box-shadow:inset 0 3px 0 rgba(0,0,0,.28); font-weight:600;}
+  :root.game .crumb b{font-size:19px; -webkit-text-stroke-width:3.5px;}
+  :root.game .note{border:2px dashed var(--muted); border-radius:20px; padding:0 8px;}
+  :root.game .dtab{border:3px solid var(--ol); border-radius:12px; background:var(--well); padding:5px 2px 6px; gap:3px; box-shadow:inset 0 3px 0 rgba(0,0,0,.25);}
+  :root.game .dtab > span:first-child{font-size:14.5px; -webkit-text-stroke-width:3px; opacity:.8;}
+  :root.game .dtab[aria-selected="true"]{background:linear-gradient(var(--panel-hi) 0 55%, var(--panel) 55%); border-color:var(--ol); box-shadow:inset 0 -3px 0 var(--panel-lo), 0 3px 0 var(--ol); transform:translateY(-2px);}
+  :root.game .dtab[aria-selected="true"] > span:first-child{opacity:1;}
+  :root.game[data-theme="light"] .dtab > span:first-child{color:#fff;}
+  :root.game .mark{border:2px solid var(--ol); width:20px; height:20px; box-shadow:0 2px 0 var(--ol);}
+  :root.game .band{position:relative; border:3px solid var(--ol); border-radius:16px; padding:10px 14px 12px; box-shadow:inset 0 3px 0 rgba(255,255,255,.35), inset 0 -6px 0 rgba(0,0,0,.18), 0 4px 0 var(--ol); margin-bottom:12px;}
+  :root.game .band.hold{background:repeating-linear-gradient(135deg, var(--hold) 0 14px, #E9CF33 14px 28px);}
+  :root.game .bandmark{width:44px; height:44px; border-radius:50%; background:#fff; border:3px solid var(--ol); display:grid; place-items:center; box-shadow:0 3px 0 var(--ol); color:var(--ol);}
+  :root.game .bandmark svg{width:24px; height:24px; stroke-width:2.6;}
+  :root.game .bandword{font-size:34px; line-height:1; -webkit-text-stroke-width:5px;}
+  :root.game .bandagree{margin-top:5px; opacity:1; align-self:flex-start; background:var(--ol); color:#fff; border-radius:20px; padding:1px 9px; font-size:11px;}
+  :root.game .bandtext{font-weight:600;}
+  :root.game .radar{background:var(--well); border:2.5px solid var(--ol); border-radius:20px; padding:3px 12px !important; box-shadow:inset 0 2px 0 rgba(0,0,0,.3);}
+  :root.game .tee b{font-family:var(--hd); font-weight:400;}
+  :root.game .tee input[type=range]{height:14px; border:2.5px solid var(--ol); border-radius:10px;}
+  :root.game .teeclear{border:2.5px solid var(--ol) !important; border-radius:10px; font-family:var(--hd); font-weight:400; color:var(--ink); background:linear-gradient(var(--panel-hi) 0 55%, var(--panel) 55%) !important; box-shadow:inset 0 -2px 0 var(--panel-lo), 0 2px 0 var(--ol);}
+  :root.game .hwrap{border:3px solid var(--ol); border-radius:16px; background:var(--panel); box-shadow:inset 0 3px 0 rgba(255,255,255,.06), 0 4px 0 var(--ol); padding:2px 4px 4px 0;}
+  :root.game .hlabels{background:var(--panel); border-right:2.5px solid var(--ol); padding-left:8px;}
+  :root.game .hcell.inplay{background:var(--panel-hi); box-shadow:inset 0 -2px 0 var(--panel-lo);}
+  :root.game .htemp{font-family:var(--hd); font-weight:400; font-size:15px;}
+  :root.game .htick{border:2px solid var(--ol); height:14px; border-radius:6px; box-shadow:0 2px 0 var(--ol);}
+  :root.game .bar{border:1.5px solid var(--ol); border-bottom:0;}
+  :root.game .key{border-top:0; margin-top:14px;}
+  :root.game .key b{font-family:var(--hd); font-weight:400; color:var(--muted); font-size:12px; letter-spacing:.03em;}
+  :root.game .kitem{background:var(--well); border:2px solid var(--ol); border-radius:20px; padding:1px 9px 1px 3px; color:var(--ink);}
+  :root.game:not([data-theme="light"]){--turf:#132820;}
+  :root.game header{padding-top:calc(8px + env(safe-area-inset-top)); padding-bottom:6px;}
+  :root.game .brand{padding:2px 12px 4px;}
+  :root.game h1{font-size:25px;}
+  :root.game .stamp{font-size:11px; margin-top:-1px;}
+  :root.game .iconbtn{width:40px; height:40px;}
+  :root.game .tabs{margin-bottom:8px;}
+  :root.game .tab{font-size:16px; padding:3px 0 4px;}
+  :root.game .combo{margin-bottom:8px;}
+  :root.game #find{padding-top:9px !important; padding-bottom:9px !important;}
+  :root.game .crumb{margin-bottom:6px !important;}
+  :root.game .days{margin-bottom:10px;}
+  :root.game .dtab{padding:4px 2px 5px;}
+  :root.game .band{padding:8px 12px 10px; margin-bottom:10px; gap:11px;}
+  :root.game .bandmark{width:38px; height:38px;}
+  :root.game .bandword{font-size:30px;}
+  :root.game .gline, :root.game .sunline{margin-bottom:6px !important;}
+  :root.game .radar{margin-bottom:8px !important;}
+  :root.game .tee{margin-bottom:8px;}
+  :root.game .bar{border:0; box-shadow:0 0 0 1.5px var(--ol);}
+  :root.game .key{margin-top:10px;}
+  :root.game .band{margin-bottom:8px;}
+  :root.game .key{margin-top:8px; gap:5px 8px;}
+  :root.game .tab, :root.game .tab[aria-selected="true"]{color:#fff !important;}
+  :root.game .dtab > span:first-child{-webkit-text-stroke-width:3px;}
+  :root.game .bar[style*="height:0px"]{box-shadow:none;}
+  :root.game[data-theme="light"] .tab:not([aria-selected="true"]), :root.game[data-theme="light"] .dtab:not([aria-selected="true"]){background:#5E7F70;}
+  :root.game[data-theme="light"] .crumb b{color:var(--ink); -webkit-text-stroke:0; text-shadow:none;}
+  :root.game{--ball:#F4F6F0; --ball-lo:#CBD5C8; --forest:#173D2E;}
+  :root.game .brand, :root.game .tab[aria-selected="true"]{background: radial-gradient(circle at 30% 30%, rgba(23,61,46,.10) 0 2.2px, transparent 2.6px) 0 0/11px 11px, linear-gradient(var(--ball) 0 60%, var(--ball-lo) 60%) !important; box-shadow:inset 0 2px 0 #fff, 0 3px 0 var(--ol) !important;}
+  :root.game .brand h1, :root.game .tab[aria-selected="true"]{color:var(--forest) !important; -webkit-text-stroke:0 !important; text-shadow:0 2px 0 #fff, 0 -1px 0 rgba(23,61,46,.15) !important;}
+  :root.game .stamp{color:#4C6658;}
+  :root.game[data-theme="light"] .dtab[aria-selected="true"] > span:first-child{color:var(--forest); -webkit-text-stroke:0; text-shadow:none;}
 
   @media (prefers-reduced-motion:reduce){ *{ animation:none !important; transition:none !important; } }
 </style>
@@ -584,10 +724,20 @@
   <span class="kitem"><span class="mark go" data-mark="go"></span>Good</span>
   <span class="kitem"><span class="mark hold" data-mark="hold"></span>Caution</span>
   <span class="kitem"><span class="mark stop" data-mark="stop"></span>Avoid</span>
+  <span class="br"></span>
   <b>Ground</b>
   <span><i class="bar firm"></i>Firm</span>
   <span><i class="bar soft"></i>Soft</span>
   <span><i class="bar sodden"></i>Sodden</span>
+</div>
+
+<div class="look">
+  Look
+  <span class="seg" role="group" aria-label="Design">
+    <button type="button" data-skin="classic" aria-pressed="true">Classic</button>
+    <button type="button" data-skin="game" aria-pressed="false">Game</button>
+  </span>
+  <button type="button" class="votelink" id="votelink">Vote here</button>
 </div>
 
 <p class="credit">
@@ -595,6 +745,30 @@
   the ECMWF, ICON, GFS and CMA models. Radar by <a href="https://www.rainviewer.com/" target="_blank" rel="noopener">RainViewer</a> from PAGASA radars.
   Wind arrows point where the wind blows. Ground is inferred from rainfall and modelled soil moisture, not a course report.
 </p>
+
+<div class="pop" id="trypop" role="dialog" aria-modal="true" aria-labelledby="trytitle" hidden>
+  <div class="popcard">
+    <h2 id="trytitle">Try the new look?</h2>
+    <p>Tee Forecast has a new game-style design on trial. Switch between <b>Classic</b> and <b>Game</b>
+       anytime at the bottom of the page, then tap <b>Vote here</b> to pick your favourite<span id="tryend"></span>.</p>
+    <div class="popbtns">
+      <button type="button" id="trylater">Not now</button>
+      <button type="button" class="main" id="tryit">Try it</button>
+    </div>
+  </div>
+</div>
+
+<div class="pop" id="votepop" role="dialog" aria-modal="true" aria-labelledby="votetitle" hidden>
+  <div class="popcard">
+    <h2 id="votetitle">Which look do you prefer?</h2>
+    <p>One vote per phone. You can change it until voting closes<span id="voteend"></span>.</p>
+    <div class="popbtns">
+      <button type="button" data-vote="classic">Classic</button>
+      <button type="button" data-vote="game">Game</button>
+    </div>
+    <p class="popnote" id="votenote"></p>
+  </div>
+</div>
 
 <script>
 /* ==================================================================
@@ -780,6 +954,137 @@ document.getElementById('theme').onclick = function(){
 };
 
 applyTheme();
+
+/* ==================================================================
+   4b. LOOK + POLL
+   Two designs: Classic and Game (a class on <html>). Each phone keeps
+   its own choice. While the poll runs, visits, look switches and votes
+   are posted to a Google Sheet through an Apps Script web app, with a
+   random per-phone ID and nothing personal. Paste the web app URL
+   (it ends in /exec) between the quotes below. Left empty, nothing is
+   sent, and the switch and pop-ups still work.
+   ================================================================== */
+
+const POLL = {
+  url: '',
+  end: '2026-12-11',   // last day of voting (Manila time); the poll hides itself after
+  visitGapMin: 30       // page opens closer together than this count as one visit
+};
+
+K.skin = 'teesheet.skin'; K.tryseen = 'teesheet.tryseen'; K.vote = 'teesheet.vote';
+K.uid = 'teesheet.uid'; K.lastvisit = 'teesheet.lastvisit';
+
+let skin = load(K.skin, 'classic');
+if(skin !== 'game') skin = 'classic';
+
+function pollOpen(){
+  const today = new Date().toLocaleDateString('en-CA', { timeZone:'Asia/Manila' });
+  return today <= POLL.end;
+}
+function endLabel(){
+  return new Date(POLL.end + 'T00:00:00').toLocaleDateString(undefined, { month:'short', day:'numeric' });
+}
+
+function uid(){
+  let id = load(K.uid, null);
+  if(!id){
+    id = (window.crypto && crypto.randomUUID) ? crypto.randomUUID()
+       : 'x' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+    save(K.uid, id);
+  }
+  return id;
+}
+
+// Apps Script answers through a redirect without CORS headers, so the
+// request is sent opaque ('no-cors', plain text): it lands, we just
+// can't read the reply. Failures are ignored; the app never waits on it.
+function track(type, value){
+  if(!POLL.url || !pollOpen()) return;
+  try {
+    fetch(POLL.url, {
+      method:'POST', mode:'no-cors', keepalive:true,
+      headers:{ 'Content-Type':'text/plain;charset=utf-8' },
+      body: JSON.stringify({ type:type, id:uid(), skin:skin, value:value || '' })
+    }).catch(function(){});
+  } catch(e){}
+}
+
+function applySkin(){
+  document.documentElement.classList.toggle('game', skin === 'game');
+  document.querySelectorAll('.seg [data-skin]').forEach(function(b){
+    b.setAttribute('aria-pressed', String(b.dataset.skin === skin));
+  });
+}
+function setSkin(s, why){
+  if(s === skin) return;
+  skin = s;
+  save(K.skin, skin);
+  applySkin();
+  track('skin', why || '');
+}
+
+document.querySelectorAll('.seg [data-skin]').forEach(function(b){
+  b.onclick = function(){ setSkin(b.dataset.skin); };
+});
+
+const tryPop  = document.getElementById('trypop');
+const votePop = document.getElementById('votepop');
+const voteLink = document.getElementById('votelink');
+
+function closePop(p){ p.hidden = true; }
+[tryPop, votePop].forEach(function(p){
+  p.addEventListener('click', function(e){ if(e.target === p) closePop(p); });
+});
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Escape'){ closePop(tryPop); closePop(votePop); }
+});
+
+document.getElementById('tryit').onclick = function(){
+  save(K.tryseen, true); closePop(tryPop); setSkin('game', 'popup');
+};
+document.getElementById('trylater').onclick = function(){
+  save(K.tryseen, true); closePop(tryPop);
+};
+
+function markVote(){
+  const v = load(K.vote, null);
+  votePop.querySelectorAll('[data-vote]').forEach(function(b){
+    b.setAttribute('aria-pressed', String(b.dataset.vote === v));
+    b.classList.toggle('main', b.dataset.vote === v);
+  });
+  return v;
+}
+voteLink.onclick = function(){
+  const v = markVote();
+  document.getElementById('votenote').textContent =
+    v ? 'You voted ' + (v === 'game' ? 'Game' : 'Classic') + '. Tap the other to change.' : '';
+  votePop.hidden = false;
+};
+votePop.querySelectorAll('[data-vote]').forEach(function(b){
+  b.onclick = function(){
+    const v = b.dataset.vote;
+    save(K.vote, v);
+    markVote();
+    track('vote', v);
+    document.getElementById('votenote').textContent =
+      'Thanks! Vote counted for ' + (v === 'game' ? 'Game' : 'Classic') + '.';
+    setTimeout(function(){ closePop(votePop); }, 1200);
+  };
+});
+
+function startPoll(){
+  if(!pollOpen()){ voteLink.hidden = true; return; }
+  document.getElementById('tryend').textContent = ' by ' + endLabel();
+  document.getElementById('voteend').textContent = ' on ' + endLabel();
+  const last = load(K.lastvisit, 0);
+  if(Date.now() - last > POLL.visitGapMin * 60000){
+    save(K.lastvisit, Date.now());
+    track('visit');
+  }
+  if(!load(K.tryseen, false)) tryPop.hidden = false;
+}
+
+applySkin();
 
 /* ==================================================================
    5. WEATHER ICONS
@@ -1083,8 +1388,6 @@ function fmtTime(iso){
   return (h % 12 === 0 ? 12 : h % 12) + ':' + m + (h < 12 ? 'am' : 'pm');
 }
 function dayName(d, idx){
-  if(idx === 0) return 'Today';
-  if(idx === 1) return 'Tomorrow';
   return new Date(d + 'T00:00:00').toLocaleDateString(undefined, { weekday:'short' });
 }
 function shortDate(d){
@@ -1952,6 +2255,7 @@ document.querySelectorAll('[data-mark]').forEach(function(el){
 closeCombo();
 renderCourse();
 refresh();
+startPoll();
 
 // Registering this is what makes Chrome treat the page as an installable app
 // rather than a bookmark. Failure is harmless — the app just stays online-only.
