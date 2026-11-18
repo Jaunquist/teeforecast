@@ -305,10 +305,10 @@
   .r1{ height:15px; }
   .r2{ height:18px; }
   .r3{ height:17px; }
-  .r4{ height:26px; border-bottom:1px solid var(--line); }
+  .r4{ height:19px; }
   .r5{ height:14px; }
   .r6{ height:22px; }
-  .r7{ height:12px; margin-top:6px; }
+  .r7{ height:20px; margin-top:3px; }
   .r8{ height:12px; }
   .msec{ display:none !important; }
   .hwrap.models .msec{ display:flex !important; flex-direction:column; align-items:stretch;
@@ -427,8 +427,20 @@
   .wind svg{ width:9px; height:9px; fill:none; stroke:currentColor; stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round; }
   .wind.brisk{ color:var(--hold); }
   .wind.gale{ color:var(--stop); font-weight:600; }
-  .htick{ width:30px; height:12px; border-radius:4px; }
+  .hcell > .htick.r7{
+    width:38px; border-radius:6px; font-size:11px; font-weight:700; letter-spacing:-.01em;
+  }
+  .htick.go{ color:var(--on-go); } .htick.hold{ color:var(--on-hold); } .htick.stop{ color:var(--on-stop); }
   .htick.hold{ background:repeating-linear-gradient(135deg, var(--hold) 0 3px, var(--hold-2) 3px 6px); }
+  .hcell > .htick.hold, .keybox .htick.hold{ background:var(--hold); }
+  .gpill{
+    width:34px; height:18px; border-radius:9px; display:flex; align-items:center; justify-content:center;
+    font-size:11px; font-weight:600; color:#2B1F0C;
+  }
+  .gpill.firm{ background:var(--firm); } .gpill.soft{ background:var(--soft); }
+  .gpill.sodden{ background:var(--sodden); color:#fff; }
+  .gpill.wet{ font-weight:800; }
+  .hlabels .r4{ flex-direction:column; align-items:flex-end; justify-content:center; gap:0; }
   .htick svg{ width:8px; height:8px; fill:none; stroke:var(--on-stop); stroke-width:2.4; stroke-linecap:round; }
 
   .scrollnote{ color:var(--dead); font-size:10.5px; }
@@ -534,6 +546,17 @@
   .key b{ min-width:48px; font-weight:600; color:var(--dead); font-size:11px; }
   .key .br{ flex-basis:100%; height:0; }
 
+  .keybox{ margin-top:10px; border:1px solid var(--line); border-radius:10px; font-size:12px; color:var(--muted); }
+  .keybox summary{ cursor:pointer; padding:6px 10px; font-weight:600; color:var(--ink); list-style:none; display:flex; align-items:center; gap:6px; }
+  .keybox summary::-webkit-details-marker{ display:none; }
+  .keybox summary::after{ content:''; width:6px; height:6px; border-right:2px solid currentColor; border-bottom:2px solid currentColor; transform:rotate(45deg) translateY(-2px); margin-left:2px; }
+  .keybox[open] summary::after{ transform:rotate(-135deg) translateY(-1px); }
+  .keybox dl{ display:grid; grid-template-columns:44px 1fr; gap:6px 10px; align-items:center; margin:0; padding:2px 10px 10px; }
+  .keybox dt{ display:flex; justify-content:center; font-family:'Barlow Condensed',sans-serif; }
+  .keybox dd{ margin:0; line-height:1.3; }
+  .keybox dd b{ color:var(--ink); font-weight:600; }
+  .keybox .htick{ width:44px; height:17px; border-radius:5px; display:flex; align-items:center; justify-content:center; font-size:10.5px; font-weight:700; }
+  .keybox .agt{ font-size:11px; color:var(--hold); }
   .credit{ margin-top:6px; font-size:9px; color:var(--dead); line-height:1.35; }
   .credit a{ color:var(--dead); }
 
@@ -638,7 +661,7 @@
   :root.game .hlabels{background:var(--panel); border-right:2.5px solid var(--ol); padding-left:8px;}
   :root.game .hcell.inplay{background:var(--panel-hi); box-shadow:inset 0 -2px 0 var(--panel-lo);}
   :root.game .htemp{font-family:var(--hd); font-weight:400; font-size:15px;}
-  :root.game .htick{border:2px solid var(--ol); height:14px; border-radius:6px; box-shadow:0 2px 0 var(--ol);}
+  :root.game .htick{border:2px solid var(--ol); border-radius:6px; box-shadow:0 2px 0 var(--ol);} :root.game .gpill{border:2px solid var(--ol);} :root.game .keybox{border:2.5px solid var(--ol); border-radius:12px; background:var(--well); box-shadow:inset 0 2px 0 rgba(0,0,0,.25);} :root.game .keybox summary{font-family:var(--hd); font-weight:400; font-size:14px; color:#fff; -webkit-text-stroke:3px var(--ol); paint-order:stroke fill;} :root.game[data-theme="light"] .keybox summary{color:var(--ink); -webkit-text-stroke:0;}
   :root.game .bar{border:1.5px solid var(--ol); border-bottom:0;}
   :root.game .key{border-top:0; margin-top:14px;}
   :root.game .key b{font-family:var(--hd); font-weight:400; color:var(--muted); font-size:12px; letter-spacing:.03em;}
@@ -719,17 +742,18 @@
 
 <section class="view" id="view-lists" role="tabpanel" aria-labelledby="tab-lists" hidden></section>
 
-<div class="key">
-  <b>Play</b>
-  <span class="kitem"><span class="mark go" data-mark="go"></span>Good</span>
-  <span class="kitem"><span class="mark hold" data-mark="hold"></span>Caution</span>
-  <span class="kitem"><span class="mark stop" data-mark="stop"></span>Avoid</span>
-  <span class="br"></span>
-  <b>Ground</b>
-  <span><i class="bar firm"></i>Firm</span>
-  <span><i class="bar soft"></i>Soft</span>
-  <span><i class="bar sodden"></i>Sodden</span>
-</div>
+<details class="keybox">
+  <summary>What the colours mean</summary>
+  <dl>
+    <dt><span class="htick go">Good</span></dt><dd>No rain, gusts under 30&nbsp;km/h, feels under 38&deg;</dd>
+    <dt><span class="htick hold">Caution</span></dt><dd>Any rain or drizzle, gusts 30&nbsp;km/h+, or feels 38&deg;+</dd>
+    <dt><span class="htick stop">Avoid</span></dt><dd>Thunderstorm, heavy showers, or 4&nbsp;mm+ in the hour</dd>
+    <dt><span class="gpill firm">0</span></dt><dd><b>Firm</b>: under 20&nbsp;mm over 72&nbsp;h and drier soil (pill number = that hour&rsquo;s rain in mm)</dd>
+    <dt><span class="gpill soft">0</span></dt><dd><b>Soft</b>: 20&nbsp;mm+ over 72&nbsp;h, or damp soil</dd>
+    <dt><span class="gpill sodden">0</span></dt><dd><b>Sodden</b>: 50&nbsp;mm+ over 72&nbsp;h, or soaked soil</dd>
+    <dt class="agt">3/4</dt><dd><b>Agree</b>: how many of the 4 forecast models make the same call</dd>
+  </dl>
+</details>
 
 <div class="look">
   Look
@@ -966,7 +990,7 @@ applyTheme();
    ================================================================== */
 
 const POLL = {
-  url: 'https://script.google.com/macros/s/AKfycbx9Py4EMvlcnQU8fcoXRErKSvPHf8CkOqaizJ7i9R5Gi1RvLs5WPkHywUd7onU8f9ZMFQ/exec',
+  url: '',
   end: '2026-12-11',   // last day of voting (Manila time); the poll hides itself after
   visitGapMin: 30       // page opens closer together than this count as one visit
 };
@@ -1296,7 +1320,11 @@ async function fetchCourse(c){
     hours[date] = rows
       .filter(function(r){ return r.date === date && r.hour >= RULES.strip[0] && r.hour <= RULES.strip[1]; })
       .map(function(r){
+        const r72 = rows.reduce(function(s, x){
+          return (x.ms < r.ms && x.ms >= r.ms - 72 * 3600 * 1000) ? s + x.mm : s;
+        }, 0);
         return {
+          g: ground(r72, r.soil).g,
           hour:r.hour, temp:Math.round(r.temp), mm:r.mm, pop:r.pop, code:r.code,
           wind:(r.wind == null ? null : Math.round(r.wind)),
           dir:r.dir, level: r.level || hourLevel(r),
@@ -1773,6 +1801,7 @@ function renderCourse(){
   detail.appendChild(band);
 
   const gl = document.createElement('p');
+  gl.hidden = true;
   gl.className = 'gline';
   gl.innerHTML = '<i class="' + d.g + '"></i><b>' + (d.glabel || d.gtext || '') + '</b>' +
                  (d.gnote ? ' <span>\u2014 ' + d.gnote + '</span>' : '') +
@@ -1828,9 +1857,8 @@ function renderCourse(){
     '<span class="r1">Hour</span>' +
     '<span class="r2">Sky</span>' +
     '<span class="r3">Temp</span>' +
-    '<span class="r4">Rain</span>' +
-    '<span class="r5 lc">mm</span>' +
     '<span class="r6">Wind<em class="unit">km/h</em></span>' +
+    '<span class="r4">Ground<em class="unit">mm rain</em></span>' +
     '<span class="r7">Play</span>' +
     (hasPer
       ? '<button type="button" class="r8 mtog" aria-expanded="' + modelsOpen + '" ' +
@@ -1872,7 +1900,6 @@ function renderCourse(){
   entry.hours[date].forEach(function(r){
     const cell   = document.createElement('div');
     const glyph  = icon(r.code);
-    const barPx  = r.mm > 0 ? Math.max(Math.min(r.mm / RULES.barMax, 1) * 25, 2) : 0;
     const gusty  = r.wind == null ? ''
                  : (r.wind >= RULES.windRed ? ' gale' : (r.wind >= RULES.windAmber ? ' brisk' : ''));
 
@@ -1881,15 +1908,13 @@ function renderCourse(){
       '<span class="hr r1">' + shortClock(r.hour) + '</span>' +
       '<span class="wx r2 ' + glyph.cls + '">' + glyph.svg + '</span>' +
       '<span class="htemp r3">' + r.temp + '\u00b0</span>' +
-      '<span class="barwrap r4"><span class="bar" style="height:' + barPx + 'px"></span></span>' +
-      '<span class="hmm r5' + (r.mm >= RULES.heavyPeak ? ' soaking' : (r.mm >= RULES.mmAmber ? ' wet' : '')) + '">' +
-      (r.mm >= 0.1 ? r.mm.toFixed(1) : '') + '</span>' +
       (r.wind == null ? '<span class="wind r6"></span>'
         : '<span class="wind r6' + gusty + '">' +
           (r.dir == null ? '' : windArrow(r.dir)) + r.wind + '</span>') +
-      '<span class="htick r7 ' + r.level + '">' +
-      (r.level === 'stop' ? '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 3l6 6M9 3L3 9"/></svg>' : '') +
-      '</span>' +
+      '<span class="r4"><span class="gpill ' + (r.g || 'firm') +
+        (r.mm >= RULES.mmAmber ? ' wet' : '') + '">' +
+        (r.mm >= 0.1 ? r.mm.toFixed(1) : '0') + '</span></span>' +
+      '<span class="htick r7 ' + r.level + '">' + WORD[r.level] + '</span>' +
       '<span class="agree r8' + (r.n && r.agree < r.n ? ' split' : '') + '">' +
       (r.n ? r.agree + '/' + r.n : '') + '</span>' +
       names.map(function(n, k){
