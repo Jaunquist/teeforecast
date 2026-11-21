@@ -18,7 +18,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700&family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --turf:   #0E1D18;
@@ -27,6 +27,7 @@
     --ink:    #E9F0EA;
     --muted:  #86A093;
     --dead:   #3A4F46;
+    --faint:  #7D9689;
     /* Status colours are colour-blind safe (Okabe-Ito based): they differ
        in lightness as well as hue, so they still separate when red and
        green can't be told apart. Never use them as the only cue. */
@@ -55,8 +56,9 @@
     --raised: #FFFFFF;
     --line:   #D3DCD2;
     --ink:    #16241E;
-    --muted:  #5C7268;
+    --muted:  #4F655B;
     --dead:   #9AACA1;
+    --faint:  #5F7369;
     --go:     #0B6FB0;
     --hold:   #D4AA1C;
     --hold-2: #9C7C0E;
@@ -104,6 +106,13 @@
     border:1px solid var(--line); background:var(--raised); color:var(--ink);
     display:grid; place-items:center; cursor:pointer; transition:border-color .2s;
   }
+  html[data-txt="2"] h1{ font-size:21px !important; white-space:nowrap; }
+  html[data-txt="1"] h1{ white-space:nowrap; }
+  .txtbtn{ display:flex; align-items:baseline; justify-content:center; gap:0; font-family:'Barlow Condensed',sans-serif; font-weight:700; position:relative; }
+  .txtbtn span:first-child{ font-size:13px; } .txtbtn span:nth-child(2){ font-size:19px; }
+  .txtbtn i{ position:absolute; right:-3px; top:-3px; min-width:16px; height:16px; border-radius:8px; padding:0 3px;
+    background:var(--ink); color:var(--turf); font:700 11px/16px 'Barlow Condensed',sans-serif; font-style:normal; }
+  .txtbtn i:empty{ display:none; }
   .iconbtn:hover{ border-color:var(--muted); }
   .iconbtn:focus-visible{ outline:2px solid var(--go); outline-offset:2px; }
   .iconbtn svg{ width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round; }
@@ -137,7 +146,7 @@
   }
   #installbtn:focus-visible{ outline:2px solid var(--ink); outline-offset:2px; }
   #installx{
-    border:0; background:transparent; color:var(--dead);
+    border:0; background:transparent; color:var(--faint);
     font-size:19px; line-height:1; width:28px; height:28px; cursor:pointer;
   }
   #installx:hover{ color:var(--ink); }
@@ -169,8 +178,8 @@
     box-shadow:0 14px 30px var(--shadow);
   }
   .grp{
-    font-family:'Barlow Condensed',sans-serif; font-size:11px; font-weight:600;
-    letter-spacing:.09em; text-transform:uppercase; color:var(--dead);
+    font-family:'Barlow Condensed',sans-serif; font-size:12px; font-weight:600;
+    letter-spacing:.09em; text-transform:uppercase; color:var(--faint);
     padding:10px 14px 3px;
   }
   .hit{
@@ -194,7 +203,7 @@
     border:0; background:transparent; cursor:pointer; padding:0;
     color:var(--hold); font-size:12.5px; font-style:italic; margin-left:auto; text-align:right;
   }
-  .note.blank{ color:var(--dead); font-style:normal; }
+  .note.blank{ color:var(--faint); font-style:normal; }
   .note:focus-visible{ outline:2px solid var(--go); outline-offset:2px; }
   .noteinput{
     width:100%; margin-bottom:10px; padding:8px 10px;
@@ -285,7 +294,7 @@
   .tee input[type=range]:focus-visible{ outline:2px solid var(--go); outline-offset:2px; }
   .teeclear{
     flex:0 0 auto; border:1px solid var(--line); border-radius:6px; background:transparent;
-    color:var(--muted); font-family:'Barlow',sans-serif; font-size:11.5px;
+    color:var(--muted); font-family:'Barlow',sans-serif; font-size:12.5px;
     padding:4px 9px; cursor:pointer;
   }
   .teeclear:hover{ color:var(--ink); border-color:var(--muted); }
@@ -333,14 +342,14 @@
     background:var(--tint); box-shadow:7px 0 0 var(--tint);
   }
   .hwrap .mrow.m0{ border-top:2px solid var(--sk); }
-  .hlabels .mname{ text-transform:none; letter-spacing:.02em; font-size:11.5px; }
+  .hlabels .mname{ text-transform:none; letter-spacing:.02em; font-size:12.5px; }
   .msrc{
     border:0; background:transparent; padding:0 0 0 1px; cursor:pointer;
     font:inherit; font-weight:700; letter-spacing:inherit; color:var(--sk);
     text-decoration:underline dotted; text-underline-offset:2px;
   }
   .msrc:focus-visible{ outline:2px solid var(--go); outline-offset:1px; }
-  .hlabels .m1, .hlabels .m2, .hlabels .m3{ font-size:9.5px; }
+  .hlabels .m1, .hlabels .m2, .hlabels .m3{ font-size:11px; }
   .hcell > .mrow.m1 svg{ width:14px; height:14px; }
   .mrow.m3 > .htick{ width:24px; height:7px; border-radius:3px; display:flex; align-items:center; justify-content:center; }
   .mrow.m3 > .htick svg{ width:6px; height:6px; }
@@ -360,7 +369,7 @@
   .srcpop dt{ color:var(--muted); }
   .srcpop dd{ margin:0; font-weight:600; }
   .spstat{ margin:0 0 6px; font-weight:600; }
-  .spnote{ margin:0; color:var(--muted); font-size:11.5px; }
+  .spnote{ margin:0; color:var(--muted); font-size:12.5px; }
   .mtog{
     display:flex; align-items:center; justify-content:flex-end; gap:2px;
     border:0; background:transparent; padding:0; cursor:pointer;
@@ -371,12 +380,12 @@
              stroke-linecap:round; stroke-linejoin:round; transition:transform .15s; }
   .mtog[aria-expanded="true"] svg{ transform:rotate(180deg); }
   .mtog:focus-visible{ outline:2px solid var(--go); outline-offset:1px; }
-  .agree{ font-size:10.5px; color:var(--dead); }
+  .agree{ font-size:12px; color:var(--faint); }
   .agree.split{ color:var(--ink); font-weight:600; }
-  .hlabels .r8{ font-size:10px; }
+  .hlabels .r8{ font-size:11.5px; }
 
   .bandhead{ display:flex; flex-direction:column; flex:0 0 auto; }
-  .bandagree{ font-size:11.5px; font-weight:600; white-space:nowrap; opacity:.8; margin-top:3px; }
+  .bandagree{ font-size:12.5px; font-weight:600; white-space:nowrap; opacity:.8; margin-top:3px; }
 
   .radar{
     display:flex; align-items:center; gap:7px; width:100%;
@@ -403,12 +412,12 @@
     content:''; position:absolute; left:50%; top:50%; width:4px; height:4px;
     margin:-2px 0 0 -2px; background:var(--ink); border-radius:50%; z-index:2;
   }
-  .radarmap span{ position:absolute; left:6px; bottom:4px; font-size:10px; color:var(--muted); z-index:2; }
+  .radarmap span{ position:absolute; left:6px; bottom:4px; font-size:11.5px; color:var(--muted); z-index:2; }
 
   .hlabels .r6{ flex-direction:column; align-items:flex-end; justify-content:center; gap:0; }
   .hlabels .unit{
-    font-size:9.5px; font-weight:500; text-transform:none; letter-spacing:0;
-    color:var(--dead); line-height:1.1;
+    font-size:11px; font-weight:500; text-transform:none; letter-spacing:0;
+    color:var(--faint); line-height:1.1;
   }
 
   .hr{ font-size:12.5px; color:var(--muted); }
@@ -420,22 +429,22 @@
   .htemp{ font-size:14px; font-weight:600; }
   .hcell > span.barwrap{ width:100%; align-items:flex-end; }
   .bar{ width:10px; border-radius:2px 2px 0 0; background:var(--rain); }
-  .hmm{ font-size:11.5px; color:var(--muted); }
+  .hmm{ font-size:12.5px; color:var(--muted); }
   .hmm.wet{ color:var(--hold); }
   .hmm.soaking{ color:var(--stop); font-weight:600; }
-  .wind{ gap:2px; font-size:11.5px; color:var(--muted); }
+  .wind{ gap:2px; font-size:12.5px; color:var(--muted); }
   .wind svg{ width:9px; height:9px; fill:none; stroke:currentColor; stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round; }
   .wind.brisk{ color:var(--hold); }
   .wind.gale{ color:var(--stop); font-weight:600; }
   .hcell > .htick.r7{
-    width:38px; border-radius:6px; font-size:11px; font-weight:700; letter-spacing:-.01em;
+    width:38px; border-radius:6px; font-size:12px; font-weight:700; letter-spacing:-.01em;
   }
   .htick.go{ color:var(--on-go); } .htick.hold{ color:var(--on-hold); } .htick.stop{ color:var(--on-stop); }
   .htick.hold{ background:repeating-linear-gradient(135deg, var(--hold) 0 3px, var(--hold-2) 3px 6px); }
   .hcell > .htick.hold, .keybox .htick.hold{ background:var(--hold); }
   .gpill{
     width:34px; height:18px; border-radius:9px; display:flex; align-items:center; justify-content:center;
-    font-size:11px; font-weight:600; color:#2B1F0C;
+    font-size:12px; font-weight:600; color:#2B1F0C;
   }
   .gpill.firm{ background:var(--firm); } .gpill.soft{ background:var(--soft); }
   .gpill.sodden{ background:var(--sodden); color:#fff; }
@@ -443,7 +452,7 @@
   .hlabels .r4{ flex-direction:column; align-items:flex-end; justify-content:center; gap:0; }
   .htick svg{ width:8px; height:8px; fill:none; stroke:var(--on-stop); stroke-width:2.4; stroke-linecap:round; }
 
-  .scrollnote{ color:var(--dead); font-size:10.5px; }
+  .scrollnote{ color:var(--faint); font-size:12px; }
 
   /* ---------- lists view ---------- */
 
@@ -452,12 +461,12 @@
     letter-spacing:.05em; color:var(--muted); margin:22px 0 8px;
   }
   .sect:first-child{ margin-top:0; }
-  .hint{ color:var(--dead); font-size:12px; margin-bottom:12px; line-height:1.5; }
+  .hint{ color:var(--faint); font-size:12px; margin-bottom:12px; line-height:1.5; }
 
   .chips{ display:flex; flex-wrap:wrap; gap:5px; margin-bottom:6px; }
   .chip{
     border:1px solid var(--line); border-radius:16px; background:transparent;
-    color:var(--muted); font-family:'Barlow',sans-serif; font-size:11.5px;
+    color:var(--muted); font-family:'Barlow',sans-serif; font-size:12.5px;
     padding:5px 9px; cursor:pointer; white-space:nowrap;
   }
   .chip:hover{ color:var(--ink); border-color:var(--muted); }
@@ -490,7 +499,7 @@
   .open:focus-visible{ outline:2px solid var(--go); outline-offset:2px; }
   .drop{
     flex:0 0 auto; width:26px; height:26px; border:0; border-radius:50%;
-    background:transparent; color:var(--dead); font-size:19px; line-height:1; cursor:pointer;
+    background:transparent; color:var(--faint); font-size:19px; line-height:1; cursor:pointer;
   }
   .drop:hover{ color:var(--stop); }
   .drop:focus-visible{ outline:2px solid var(--go); outline-offset:1px; }
@@ -502,7 +511,7 @@
     display:flex; flex-direction:column; align-items:center; gap:5px;
   }
   .dow{ font-size:12px; font-weight:600; color:var(--muted); }
-  .date{ font-size:11px; color:var(--dead); margin-top:-4px; }
+  .date{ font-size:12px; color:var(--faint); margin-top:-4px; }
   .lamp{ width:15px; height:15px; border-radius:50%; }
   .day .mark{ width:18px; height:18px; }
   .deg{ font-size:15px; font-weight:600; line-height:1; }
@@ -518,7 +527,7 @@
 
   .snippet{
     margin-top:12px; padding:11px 13px; background:var(--raised); border-radius:7px;
-    font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:11.5px;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:12.5px;
     color:var(--muted); word-break:break-all; line-height:1.6;
   }
 
@@ -543,7 +552,7 @@
   .key i{ display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:6px; }
   .kitem{ display:inline-flex; align-items:center; gap:6px; }
   .key i.bar{ width:14px; height:5px; border-radius:3px; }
-  .key b{ min-width:48px; font-weight:600; color:var(--dead); font-size:11px; }
+  .key b{ min-width:48px; font-weight:600; color:var(--faint); font-size:12px; }
   .key .br{ flex-basis:100%; height:0; }
 
   .keybox{ margin-top:10px; border:1px solid var(--line); border-radius:10px; font-size:12px; color:var(--muted); }
@@ -555,10 +564,11 @@
   .keybox dt{ display:flex; justify-content:center; font-family:'Barlow Condensed',sans-serif; }
   .keybox dd{ margin:0; line-height:1.3; }
   .keybox dd b{ color:var(--ink); font-weight:600; }
-  .keybox .htick{ width:44px; height:17px; border-radius:5px; display:flex; align-items:center; justify-content:center; font-size:10.5px; font-weight:700; }
-  .keybox .agt{ font-size:11px; color:var(--hold); }
-  .credit{ margin-top:6px; font-size:9px; color:var(--dead); line-height:1.35; }
-  .credit a{ color:var(--dead); }
+  .keybox .htick{ width:44px; height:17px; border-radius:5px; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; }
+  .keybox .wnd{ font-size:12.5px; color:var(--muted); }
+  .keybox .agt{ font-size:12px; color:var(--hold); }
+  .credit{ margin-top:6px; font-size:10.5px; color:var(--faint); line-height:1.35; }
+  .credit a{ color:var(--faint); }
 
 
   /* ---------- look switch, vote link, pop-ups (both looks) ---------- */
@@ -602,16 +612,16 @@
   .popnote{ margin:12px 0 0 !important; font-size:12.5px !important; min-height:1.4em; }
 
   :root.game .seg{ border:2.5px solid var(--ol); border-radius:10px; background:var(--well); }
-  :root.game .seg button{ font-family:var(--hd); font-weight:400; font-size:13px; color:#fff; -webkit-text-stroke:3px var(--ol); paint-order:stroke fill; }
+  :root.game .seg button{ font-family:var(--hd); font-weight:700; font-size:13px; color:#fff; -webkit-text-stroke:3px var(--ol); paint-order:stroke fill; }
   :root.game .seg button[aria-pressed="true"]{
     color:var(--forest); -webkit-text-stroke:0;
     background:linear-gradient(var(--ball) 0 60%, var(--ball-lo) 60%);
   }
   :root.game[data-theme="light"] .seg{ background:#5E7F70; }
   :root.game[data-theme="light"] .sect{ color:var(--ink); -webkit-text-stroke:0; text-shadow:none; }
-  :root.game .votelink{ font-family:var(--hd); font-weight:400; font-size:14px; }
+  :root.game .votelink{ font-family:var(--hd); font-weight:700; font-size:14px; }
   :root.game .popcard{ background:var(--panel); border:3px solid var(--ol); border-radius:18px; box-shadow:0 5px 0 var(--ol), 0 14px 40px rgba(0,0,0,.45); }
-  :root.game .popcard h2{ font-family:var(--hd); font-weight:400; font-size:26px; color:#fff; -webkit-text-stroke:4px var(--ol); paint-order:stroke fill; text-shadow:0 2px 0 var(--ol); }
+  :root.game .popcard h2{ font-family:var(--hd); font-weight:700; font-size:26px; color:#fff; -webkit-text-stroke:4px var(--ol); paint-order:stroke fill; text-shadow:0 2px 0 var(--ol); }
   :root.game .popbtns button{
     font-family:var(--hd); font-weight:400; font-size:17px; border:3px solid var(--ol); color:#fff;
     -webkit-text-stroke:3.5px var(--ol); paint-order:stroke fill; background:var(--well);
@@ -624,13 +634,13 @@
   }
 
   /* ---------- GAME LOOK (html.game) ---------- */
-  :root.game{--ol:#06100C; --panel:#1C362C; --panel-hi:#25473A; --panel-lo:#12241D; --well:#0A1712; --banner:#5BB13A; --banner-lo:#3E8424; --hd:'Lilita One','Barlow Condensed',sans-serif;}
+  :root.game{--ol:#06100C; --panel:#1C362C; --panel-hi:#25473A; --panel-lo:#12241D; --well:#0A1712; --banner:#5BB13A; --banner-lo:#3E8424; --hd:'Baloo 2','Barlow Condensed',sans-serif;}
   :root.game[data-theme="light"]{--ol:#1D2B25; --panel:#FFFDF6; --panel-hi:#FFFFFF; --panel-lo:#E7E1CF; --well:#E9E4D4; --banner:#5BB13A; --banner-lo:#3E8424; --turf:#D9E8D2;}
-  :root.game h1, :root.game .bandword, :root.game .tab, :root.game .dtab > span:first-child, :root.game .crumb b, :root.game .sect{font-family:var(--hd); font-weight:400; letter-spacing:.01em; color:#fff; -webkit-text-stroke:4px var(--ol); paint-order:stroke fill; text-shadow:0 2px 0 var(--ol);}
+  :root.game h1, :root.game .bandword, :root.game .tab, :root.game .dtab > span:first-child, :root.game .crumb b, :root.game .sect{font-family:var(--hd); font-weight:700; letter-spacing:.01em; color:#fff; -webkit-text-stroke:4px var(--ol); paint-order:stroke fill; text-shadow:0 2px 0 var(--ol);}
   :root.game header{padding-top:calc(10px + env(safe-area-inset-top)); padding-bottom:8px;}
   :root.game .brand{background:linear-gradient(var(--banner) 0 62%, var(--banner-lo) 62%); border:3px solid var(--ol); border-radius:14px; padding:4px 12px 5px; box-shadow:inset 0 2px 0 rgba(255,255,255,.35), 0 3px 0 var(--ol);}
   :root.game h1{font-size:27px; line-height:1.05;}
-  :root.game .stamp{color:#0B1F14; font-weight:600; font-size:11.5px; margin-top:0;}
+  :root.game .stamp{color:#0B1F14; font-weight:600; font-size:12.5px; margin-top:0;}
   :root.game .iconbtn{width:42px; height:42px; border:3px solid var(--ol); color:var(--ink); background:linear-gradient(var(--panel-hi) 0 55%, var(--panel) 55%); box-shadow:inset 0 -3px 0 var(--panel-lo), 0 3px 0 var(--ol);}
   :root.game .iconbtn:active{transform:translateY(3px); box-shadow:inset 0 -1px 0 var(--panel-lo), 0 0 0 var(--ol);}
   :root.game .iconbtn svg{stroke-width:2.6;}
@@ -651,26 +661,26 @@
   :root.game .bandmark{width:44px; height:44px; border-radius:50%; background:#fff; border:3px solid var(--ol); display:grid; place-items:center; box-shadow:0 3px 0 var(--ol); color:var(--ol);}
   :root.game .bandmark svg{width:24px; height:24px; stroke-width:2.6;}
   :root.game .bandword{font-size:34px; line-height:1; -webkit-text-stroke-width:5px;}
-  :root.game .bandagree{margin-top:5px; opacity:1; align-self:flex-start; background:var(--ol); color:#fff; border-radius:20px; padding:1px 9px; font-size:11px;}
+  :root.game .bandagree{margin-top:5px; opacity:1; align-self:flex-start; background:var(--ol); color:#fff; border-radius:20px; padding:1px 9px; font-size:12px;}
   :root.game .bandtext{font-weight:600;}
   :root.game .radar{background:var(--well); border:2.5px solid var(--ol); border-radius:20px; padding:3px 12px !important; box-shadow:inset 0 2px 0 rgba(0,0,0,.3);}
-  :root.game .tee b{font-family:var(--hd); font-weight:400;}
+  :root.game .tee b{font-family:var(--hd); font-weight:700;}
   :root.game .tee input[type=range]{height:14px; border:2.5px solid var(--ol); border-radius:10px;}
-  :root.game .teeclear{border:2.5px solid var(--ol) !important; border-radius:10px; font-family:var(--hd); font-weight:400; color:var(--ink); background:linear-gradient(var(--panel-hi) 0 55%, var(--panel) 55%) !important; box-shadow:inset 0 -2px 0 var(--panel-lo), 0 2px 0 var(--ol);}
+  :root.game .teeclear{border:2.5px solid var(--ol) !important; border-radius:10px; font-family:var(--hd); font-weight:700; color:var(--ink); background:linear-gradient(var(--panel-hi) 0 55%, var(--panel) 55%) !important; box-shadow:inset 0 -2px 0 var(--panel-lo), 0 2px 0 var(--ol);}
   :root.game .hwrap{border:3px solid var(--ol); border-radius:16px; background:var(--panel); box-shadow:inset 0 3px 0 rgba(255,255,255,.06), 0 4px 0 var(--ol); padding:2px 4px 4px 0;}
   :root.game .hlabels{background:var(--panel); border-right:2.5px solid var(--ol); padding-left:8px;}
   :root.game .hcell.inplay{background:var(--panel-hi); box-shadow:inset 0 -2px 0 var(--panel-lo);}
-  :root.game .htemp{font-family:var(--hd); font-weight:400; font-size:15px;}
-  :root.game .htick{border:2px solid var(--ol); border-radius:6px; box-shadow:0 2px 0 var(--ol);} :root.game .gpill{border:2px solid var(--ol);} :root.game .keybox{border:2.5px solid var(--ol); border-radius:12px; background:var(--well); box-shadow:inset 0 2px 0 rgba(0,0,0,.25);} :root.game .keybox summary{font-family:var(--hd); font-weight:400; font-size:14px; color:#fff; -webkit-text-stroke:3px var(--ol); paint-order:stroke fill;} :root.game[data-theme="light"] .keybox summary{color:var(--ink); -webkit-text-stroke:0;}
+  :root.game .htemp{font-family:var(--hd); font-weight:700; font-size:15px;}
+  :root.game .htick{border:2px solid var(--ol); border-radius:6px; box-shadow:0 2px 0 var(--ol);} :root.game .gpill{border:2px solid var(--ol);} :root.game .keybox{border:2.5px solid var(--ol); border-radius:12px; background:var(--well); box-shadow:inset 0 2px 0 rgba(0,0,0,.25);} :root.game .keybox summary{font-family:var(--hd); font-weight:700; font-size:14px; color:#fff; -webkit-text-stroke:3px var(--ol); paint-order:stroke fill;} :root.game[data-theme="light"] .keybox summary{color:var(--ink); -webkit-text-stroke:0;}
   :root.game .bar{border:1.5px solid var(--ol); border-bottom:0;}
   :root.game .key{border-top:0; margin-top:14px;}
-  :root.game .key b{font-family:var(--hd); font-weight:400; color:var(--muted); font-size:12px; letter-spacing:.03em;}
+  :root.game .key b{font-family:var(--hd); font-weight:700; color:var(--muted); font-size:12px; letter-spacing:.03em;}
   :root.game .kitem{background:var(--well); border:2px solid var(--ol); border-radius:20px; padding:1px 9px 1px 3px; color:var(--ink);}
   :root.game:not([data-theme="light"]){--turf:#132820;}
   :root.game header{padding-top:calc(8px + env(safe-area-inset-top)); padding-bottom:6px;}
   :root.game .brand{padding:2px 12px 4px;}
   :root.game h1{font-size:25px;}
-  :root.game .stamp{font-size:11px; margin-top:-1px;}
+  :root.game .stamp{font-size:12px; margin-top:-1px;}
   :root.game .iconbtn{width:40px; height:40px;}
   :root.game .tabs{margin-bottom:8px;}
   :root.game .tab{font-size:16px; padding:3px 0 4px;}
@@ -700,6 +710,29 @@
   :root.game .stamp{color:#4C6658;}
   :root.game[data-theme="light"] .dtab[aria-selected="true"] > span:first-child{color:var(--forest); -webkit-text-stroke:0; text-shadow:none;}
 
+  /* Game look, lighter: thin outlines, display font (Baloo 2) only on the two big words */
+  :root.game h1, :root.game .bandword{ -webkit-text-stroke-width:2.5px; text-shadow:0 1.5px 0 var(--ol); }
+  :root.game .tab, :root.game .dtab > span:first-child, :root.game .crumb b, :root.game .sect,
+  :root.game .htemp, :root.game .seg button, :root.game .votelink, :root.game .keybox summary,
+  :root.game .popbtns button, :root.game .tee b, :root.game .teeclear, :root.game .key b{
+    font-family:'Barlow Condensed',sans-serif !important; font-weight:700 !important;
+    -webkit-text-stroke:0 !important; text-shadow:none !important;
+  }
+  :root.game .tab{ font-size:16px; } :root.game .dtab > span:first-child{ font-size:14.5px; }
+  :root.game .crumb b{ font-size:19px; color:var(--ink); } :root.game .htemp{ font-size:16px; }
+  :root.game .brand, :root.game .tab, :root.game .dtab, :root.game .iconbtn, :root.game #find,
+  :root.game .band, :root.game .hwrap, :root.game .radar, :root.game .keybox, :root.game .seg,
+  :root.game .htick, :root.game .gpill, :root.game .mark, :root.game .bandmark, :root.game .teeclear{ border-width:2px !important; }
+  :root.game .brand, :root.game .tab[aria-selected="true"], :root.game .iconbtn, :root.game .dtab[aria-selected="true"]{ box-shadow:inset 0 -2px 0 rgba(0,0,0,.18), 0 2px 0 var(--ol) !important; }
+  :root.game .band{ box-shadow:inset 0 2px 0 rgba(255,255,255,.3), inset 0 -4px 0 rgba(0,0,0,.15), 0 2px 0 var(--ol); }
+  :root.game .hwrap{ box-shadow:0 2px 0 var(--ol); }
+  :root.game .htick, :root.game .mark, :root.game .bandmark{ box-shadow:0 1.5px 0 var(--ol); }
+  :root.game h1, :root.game .bandword, :root.game .popcard h2{ font-family:var(--hd) !important; font-weight:700 !important; line-height:1; }
+  :root.game .popcard h2{ -webkit-text-stroke-width:2.5px; text-shadow:0 1.5px 0 var(--ol); }
+  :root.game[data-theme="light"] .popbtns button:not(.main){ color:var(--ink); }
+  :root.game[data-theme="light"] .popcard h2{ color:var(--forest) !important; -webkit-text-stroke:0; text-shadow:none; }
+  :root.game h1{ font-size:27px; letter-spacing:-.01em; } :root.game .bandword{ font-size:34px; }
+
   @media (prefers-reduced-motion:reduce){ *{ animation:none !important; transition:none !important; } }
 </style>
 </head>
@@ -710,6 +743,7 @@
     <h1>Tee Forecast</h1>
     <div class="stamp" id="stamp">Loading&hellip;</div>
   </div>
+  <button class="iconbtn txtbtn" id="txtsize" aria-label="Text size"><span>A</span><span>A</span><i></i></button>
   <button class="iconbtn" id="theme" aria-label="Switch theme"></button>
   <button class="iconbtn" id="refresh" aria-label="Refresh forecast">
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-.9 4.5"/><path d="M20 5v6h-6"/></svg>
@@ -751,6 +785,7 @@
     <dt><span class="gpill firm">0</span></dt><dd><b>Firm</b>: under 20&nbsp;mm over 72&nbsp;h and drier soil (pill number = that hour&rsquo;s rain in mm)</dd>
     <dt><span class="gpill soft">0</span></dt><dd><b>Soft</b>: 20&nbsp;mm+ over 72&nbsp;h, or damp soil</dd>
     <dt><span class="gpill sodden">0</span></dt><dd><b>Sodden</b>: 50&nbsp;mm+ over 72&nbsp;h, or soaked soil</dd>
+    <dt class="wnd">&#8601;&thinsp;15</dt><dd><b>Wind</b>: km/h, arrow points where the wind blows</dd>
     <dt class="agt">3/4</dt><dd><b>Agree</b>: how many of the 4 forecast models make the same call</dd>
   </dl>
 </details>
@@ -979,6 +1014,24 @@ document.getElementById('theme').onclick = function(){
 
 applyTheme();
 
+/* Text size: Standard, Large, Larger. Scales the whole page (CSS zoom),
+   so the layout reflows narrower rather than spilling sideways. */
+K.txt = 'teesheet.txt';
+const TXT = [ { z:1, tag:'', name:'Standard' }, { z:1.15, tag:'+', name:'Large' }, { z:1.3, tag:'++', name:'Larger' } ];
+let txt = load(K.txt, 0);
+if(!(txt >= 0 && txt < TXT.length)) txt = 0;
+function applyTxt(){
+  document.documentElement.style.zoom = TXT[txt].z === 1 ? '' : String(TXT[txt].z);
+  document.documentElement.setAttribute('data-txt', String(txt));
+  const b = document.getElementById('txtsize');
+  b.querySelector('i').textContent = TXT[txt].tag;
+  b.setAttribute('aria-label', 'Text size: ' + TXT[txt].name + '. Tap to change');
+}
+document.getElementById('txtsize').onclick = function(){
+  txt = (txt + 1) % TXT.length; save(K.txt, txt); applyTxt();
+};
+applyTxt();
+
 /* ==================================================================
    4b. LOOK + POLL
    Two designs: Classic and Game (a class on <html>). Each phone keeps
@@ -990,7 +1043,7 @@ applyTheme();
    ================================================================== */
 
 const POLL = {
-  url: '',
+  url: 'https://script.google.com/macros/s/AKfycbx9Py4EMvlcnQU8fcoXRErKSvPHf8CkOqaizJ7i9R5Gi1RvLs5WPkHywUd7onU8f9ZMFQ/exec',
   end: '2026-12-11',   // last day of voting (Manila time); the poll hides itself after
   visitGapMin: 30       // page opens closer together than this count as one visit
 };
@@ -1857,8 +1910,8 @@ function renderCourse(){
     '<span class="r1">Hour</span>' +
     '<span class="r2">Sky</span>' +
     '<span class="r3">Temp</span>' +
-    '<span class="r6">Wind<em class="unit">km/h</em></span>' +
-    '<span class="r4">Ground<em class="unit">mm rain</em></span>' +
+    '<span class="r6">Wind</span>' +
+    '<span class="r4">Ground</span>' +
     '<span class="r7">Play</span>' +
     (hasPer
       ? '<button type="button" class="r8 mtog" aria-expanded="' + modelsOpen + '" ' +
